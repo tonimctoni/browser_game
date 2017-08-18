@@ -19,6 +19,8 @@ const(
     login_file_path = "files/login.html"
     login_address = "/login"
     unlogin_address = "/unlogin"
+    get_name_address = "/get_name"
+    get_data_address = "/get_data"
     root_address = "/"
     cookie_name = "login_token"
     // time_slot_size = 12*time.Hour
@@ -71,7 +73,6 @@ type PlayerData struct{
 }
 
 type LoginState struct{
-    // Player_id uint64 // this is the map key anyways, also redundant cause player_data
     player_data *PlayerData
     token string
     ip string
@@ -79,6 +80,7 @@ type LoginState struct{
 }
 
 // TODO: Log all errors in error log file
+// TODO: Secret initial rng state should not be hardcoded
 func main() {
     // This handles the reading of user login data from disk
     login_map:=func() map[string]*LoginData {
@@ -218,7 +220,8 @@ func main() {
             return
         }
 
-        http.Error(w, fmt.Sprintln(player_data), 403)
+        w.Write([]byte(fmt.Sprintln(player_data)))
+
         return
     })
 
@@ -278,12 +281,49 @@ func main() {
         }
     })
 
-
     mux.HandleFunc(unlogin_address, func (w http.ResponseWriter, r *http.Request){
         expiration:=time.Now().Add(-login_lifetime)
         cookie:=http.Cookie{Name: cookie_name, Value: "Value", Expires: expiration}
         http.SetCookie(w, &cookie)
         http.Redirect(w, r, root_address, http.StatusFound)
+    })
+
+    mux.HandleFunc(get_name_address, func (w http.ResponseWriter, r *http.Request){
+        ids, ok:=r.URL.Query()["id"]
+        if !ok || len(ids)<1{
+            http.Error(w, "Query error", http.StatusBadRequest)
+            return
+        }
+
+        id,err:=strconv.ParseUint(ids[0], 10, 64)
+        if err!=nil{
+            http.Error(w, "Query error", http.StatusBadRequest)
+            return
+        }
+
+        player_data, ok:=player_map[id]
+        if !ok{
+            http.Error(w, "Query error", http.StatusBadRequest)
+            return
+        }
+
+        w.Write([]byte(player_data.Name))
+    })
+
+    mux.HandleFunc(get_data_address, func (w http.ResponseWriter, r *http.Request){
+        player_data,err:=get_player_data(r)
+        if(err!=nil){
+            player_data=&PlayerData{}
+        }
+
+        json_player_data,err:=json.Marshal(player_data)
+        if err!=nil{
+            log.Println(err)
+            http.Error(w, "Internal Error", http.StatusInternalServerError)
+            return
+        }
+
+        w.Write(json_player_data)
     })
 
     if err:=http.ListenAndServe(":8000", mux);err!=nil{
