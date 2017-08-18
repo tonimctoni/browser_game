@@ -1,0 +1,14 @@
+[
+    {
+        "id": 1,
+        "login_username": "toni",
+        "salted_password_hash" : "e89fd34976e5d1a275f345af222e5f2442a0eba2c754e70e3a65fe41821f47c0",
+        "salt" : "308DCEC29117B79C"
+    },
+    {
+        "id": 2,
+        "login_username": "sabrina",
+        "salted_password_hash" : "50ad15714ed1a9cd102df9ad3eaa4abb0511c322664dd7cc0125c31fbacef403",
+        "salt" : "3BD39187B05A824B"
+    }
+]
