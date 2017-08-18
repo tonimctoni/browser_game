@@ -8,15 +8,22 @@ import "fmt"
 import "io/ioutil"
 import "crypto/sha256"
 import "crypto/sha512"
+import "strings"
+import "errors"
+import "strconv"
 
 const(
     login_lifetime time.Duration = 2*time.Hour
     login_data_file = "data/login_data.json"
+    player_data_file = "data/player_data.json"
     login_file_path = "files/login.html"
     login_address = "/login"
     unlogin_address = "/unlogin"
     root_address = "/"
-    cookie_name = "token"
+    cookie_name = "login_token"
+    // time_slot_size = 12*time.Hour
+    // steps_received_per_time_slot = 20
+    // beginning_of_time = //something like time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 )
 
 type MySource struct{
@@ -44,66 +51,174 @@ func (m *MySource) Int63() int64{
         (int64(m.state[4]) << 32) | (int64(m.state[5]) << 40) | (int64(m.state[6]) << 48) | (int64(m.state[7]) << 56)
 }
 
-type UserLoginData struct{
+type LoginData struct{
     Id uint64
-    Name string
+    Login_username string
     Salted_password_hash string
     Salt string
 }
 
-type UserData struct{
+type PlayerData struct{
     Id uint64
     Name string
     Pos_x int64
     Pos_y int64
-
+    Resource_A int64
+    Resource_B int64
+    Resource_C int64
+    Available_steps int64
+    Last_time_gotten_steps int64 // number of time slots elapsed since beginning
 }
 
+type LoginState struct{
+    // Player_id uint64 // this is the map key anyways, also redundant cause player_data
+    player_data *PlayerData
+    token string
+    ip string
+    expire_date time.Time
+}
+
+// TODO: Log all errors in error log file
 func main() {
-    login_map:=func() (map[string]*UserLoginData){
+    // This handles the reading of user login data from disk
+    login_map:=func() map[string]*LoginData {
+        // Read whole file
         content, err:=ioutil.ReadFile(login_data_file)
         if err!=nil{
             panic(err.Error())
         }
 
-        var user_login_data []UserLoginData
-        err=json.Unmarshal(content, &user_login_data)
+        // Turn file content into slice of structs
+        var login_data []LoginData
+        err=json.Unmarshal(content, &login_data)
         if err!=nil{
             panic(err.Error())
         }
 
-        login_map:=make(map[string]*UserLoginData)
-        for i:=0; i<len(user_login_data); i++ {
-            login_map[user_login_data[i].Name]=&user_login_data[i]
+        // Make login map (username -> all login data) from login data of all users
+        login_map:=make(map[string]*LoginData)
+        for i:=0; i<len(login_data); i++ {
+            if _,ok:=login_map[login_data[i].Login_username];ok{
+                panic("Duplicate username")
+            }
+            login_map[login_data[i].Login_username]=&login_data[i]
         }
 
         return login_map
     }()
 
+    // This handles the reading of user player data from disk
+    player_map:=func() map[uint64]*PlayerData {
+        // Read whole file
+        content, err:=ioutil.ReadFile(player_data_file)
+        if err!=nil{
+            panic(err.Error())
+        }
 
+        // Turn file content into slice of structs
+        var player_data []PlayerData
+        err=json.Unmarshal(content, &player_data)
+        if err!=nil{
+            panic(err.Error())
+        }
 
+        // Make player map (id -> all player data) from player data of all users
+        player_map:=make(map[uint64]*PlayerData)
+        for i:=0; i<len(player_data); i++ {
+            if _,ok:=player_map[player_data[i].Id];ok{
+                panic("Duplicate player id")
+            }
+            player_map[player_data[i].Id]=&player_data[i]
+        }
 
+        return player_map
+    }()
+
+    // Make sure login_map and player_map had the same ids
+    if len(login_map)!=len(player_map){
+        panic("len(login_map)!=len(player_map)")
+    } else {
+        for _,login :=range login_map{
+            if _,ok:=player_map[login.Id];!ok{
+                panic("Id in login_map not present in player_map")
+            }
+        }
+    }
+
+    // fmt.Println(login_map)
+    // fmt.Println(player_map)
+
+    login_state_map:=make(map[uint64]*LoginState)
+
+    // Threadsafe rng
     rng:=make(chan int64)
     go func(){
-        state:=[64]byte{99,78,221,9,123,79,7,50,9,3,5,37,91,3,2,8,69,21,64,123,62,31,45,59,124,32,98,23,74,56,5,3}
+        state:=[64]byte{99,78,221,9,123,79,7,50,9,3,5,37,91,3,2,8,69,21,64,123,62,31,45,59,124,32,98,23,74,56,5,3,
+            2,4,8,3,7,6,0,1,2,5,5,2,5,3,6,2,3,3,3,0,9,7,0,0,9,7,7,2,3,3,7,3} // Secret initial state
         s:=new_MySource(state)
         for{
             rng<-s.Int63()
         }
     }()
 
+    get_ip:=func(r *http.Request)(string,error){
+        i:=strings.LastIndex(r.RemoteAddr, ":")
+        if i<0 {
+            return "", errors.New("Weird address")
+        }
+        return r.RemoteAddr[:i], nil
+    }
 
+    get_player_data:=func(r *http.Request) (*PlayerData, error){
+        cookie,err:=r.Cookie(cookie_name)
+        if err!=nil{
+            return nil, errors.New("No cookie")
+        }
 
+        split_cookie:=strings.SplitN(cookie.Value, "/", 2)
+        if len(split_cookie)!=2{
+            return nil, errors.New("Ill formated cookie (split len)")
+        }
+
+        player_id,err:=strconv.ParseUint(split_cookie[1], 16, 64)
+        if err!=nil{
+            return nil, errors.New("Ill formated cookie (parse)")
+        }
+
+        login_state, ok:=login_state_map[player_id]
+        if !ok{
+            return nil, errors.New("Id not registered as logged in")
+        }
+
+        if login_state.token!=cookie.Value{
+            return nil, errors.New("Wrong login token")
+        }
+
+        ip,err:=get_ip(r)
+        if err!=nil{
+            return nil, err
+        }
+
+        if ip!=login_state.ip{
+            return nil, errors.New("Wrong ip")
+        }
+
+        if time.Now().After(login_state.expire_date){
+            return nil, errors.New("Login expired")
+        }
+
+        return login_state.player_data, nil
+    }
 
     mux := http.NewServeMux()
     mux.HandleFunc(root_address, func (w http.ResponseWriter, r *http.Request){
-        cookie,err:=r.Cookie(cookie_name)
+        player_data,err:=get_player_data(r)
         if(err!=nil){
             http.Redirect(w, r, login_address, http.StatusFound)
             return
         }
 
-        http.Error(w, cookie.Value, 403)
+        http.Error(w, fmt.Sprintln(player_data), 403)
         return
     })
 
@@ -142,8 +257,16 @@ func main() {
                 return
             }
 
+            //Get IP
+            ip,err:=get_ip(r)
+            if err!=nil{
+                http.Error(w, "Weird address", http.StatusUnauthorized)
+                return
+            }
+
             expiration:=time.Now().Add(login_lifetime)
-            cookie_value:=fmt.Sprintf("%s/%d", fmt.Sprintf("%x", <-rng), login_data.Id)
+            cookie_value:=fmt.Sprintf("%x/%x", <-rng, login_data.Id)
+            login_state_map[login_data.Id]=&LoginState{player_map[login_data.Id], cookie_value, ip, expiration}
             cookie:=http.Cookie{Name: cookie_name, Value: cookie_value, Expires: expiration}
             http.SetCookie(w, &cookie)
             http.Redirect(w, r, root_address, http.StatusFound)
