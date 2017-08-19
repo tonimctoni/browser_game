@@ -21,7 +21,7 @@ const(
     login_data_file = "data/login_data.json"
     player_data_file = "data/player_data.json"
     login_file = "files/login.html"
-    default_file = "elm/index.html"
+    default_file = "elm_default/index.html"
     login_address = "/login"
     unlogin_address = "/unlogin"
     get_name_address = "/get_name"
