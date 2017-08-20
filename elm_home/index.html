@@ -9001,143 +9001,61 @@ var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p0 = msg;
-		if (_p0._0.ctor === 'Ok') {
-			var _p8 = _p0._0._0;
-			var available_steps = function () {
-				var _p1 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Available_steps', _elm_lang$core$Json_Decode$int),
-					_p8);
-				if (_p1.ctor === 'Ok') {
-					return _p1._0;
-				} else {
-					return -1;
+var _user$project$Main$error_message = function (model) {
+	return _elm_lang$core$Native_Utils.eq(model.error, '') ? A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{ctor: '[]'}) : A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('alert alert-warning'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$strong,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'Warning! (',
+							A2(_elm_lang$core$Basics_ops['++'], model.error, ')'))),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(' Data could not be read, please consider'),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$a,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$href('/login'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('alert-link'),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(' logging in'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(' again.'),
+						_1: {ctor: '[]'}
+					}
 				}
-			}();
-			var resource_c = function () {
-				var _p2 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Resource_C', _elm_lang$core$Json_Decode$int),
-					_p8);
-				if (_p2.ctor === 'Ok') {
-					return _p2._0;
-				} else {
-					return -1;
-				}
-			}();
-			var resource_b = function () {
-				var _p3 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Resource_B', _elm_lang$core$Json_Decode$int),
-					_p8);
-				if (_p3.ctor === 'Ok') {
-					return _p3._0;
-				} else {
-					return -1;
-				}
-			}();
-			var resource_a = function () {
-				var _p4 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Resource_A', _elm_lang$core$Json_Decode$int),
-					_p8);
-				if (_p4.ctor === 'Ok') {
-					return _p4._0;
-				} else {
-					return -1;
-				}
-			}();
-			var pos_y = function () {
-				var _p5 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Pos_y', _elm_lang$core$Json_Decode$int),
-					_p8);
-				if (_p5.ctor === 'Ok') {
-					return _p5._0;
-				} else {
-					return -1;
-				}
-			}();
-			var pos_x = function () {
-				var _p6 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Pos_x', _elm_lang$core$Json_Decode$int),
-					_p8);
-				if (_p6.ctor === 'Ok') {
-					return _p6._0;
-				} else {
-					return -1;
-				}
-			}();
-			var name = function () {
-				var _p7 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Name', _elm_lang$core$Json_Decode$string),
-					_p8);
-				if (_p7.ctor === 'Ok') {
-					return _p7._0;
-				} else {
-					return 'error';
-				}
-			}();
-			return {
-				ctor: '_Tuple2',
-				_0: _elm_lang$core$Native_Utils.update(
-					model,
-					{name: name, pos_x: pos_x, pos_y: pos_y, resource_a: resource_a, resource_b: resource_b, resource_c: resource_c, available_steps: available_steps}),
-				_1: _elm_lang$core$Platform_Cmd$none
-			};
-		} else {
-			var _p9 = _p0._0._0;
-			switch (_p9.ctor) {
-				case 'BadUrl':
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p9._0)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				case 'Timeout':
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{error: 'Timeout'}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				case 'NetworkError':
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{error: 'NetworkError'}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				case 'BadStatus':
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{error: 'BadStatus'}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				default:
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{error: 'BadPayload'}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
 			}
-		}
-	});
+		});
+};
 var _user$project$Main$info_table = function (model) {
 	return A2(
 		_elm_lang$html$Html$table,
@@ -9405,7 +9323,7 @@ var _user$project$Main$nav_bar = A2(
 										_elm_lang$html$Html$a,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$href('/home'),
+											_0: _elm_lang$html$Html_Attributes$href('/#'),
 											_1: {ctor: '[]'}
 										},
 										{
@@ -9488,6 +9406,165 @@ var _user$project$Main$nav_bar = A2(
 			}),
 		_1: {ctor: '[]'}
 	});
+var _user$project$Main$Model = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {name: a, pos_x: b, pos_y: c, resource_a: d, resource_b: e, resource_c: f, available_steps: g, error: h};
+	});
+var _user$project$Main$PlayerDataArrived = function (a) {
+	return {ctor: 'PlayerDataArrived', _0: a};
+};
+var _user$project$Main$load_player_data = A2(
+	_elm_lang$http$Http$send,
+	_user$project$Main$PlayerDataArrived,
+	_elm_lang$http$Http$getString('/get_data'));
+var _user$project$Main$init = {
+	ctor: '_Tuple2',
+	_0: A8(_user$project$Main$Model, '', 0, 0, 0, 0, 0, 0, ''),
+	_1: _user$project$Main$load_player_data
+};
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		if (_p0.ctor === 'LoadPlayerData') {
+			return {ctor: '_Tuple2', _0: model, _1: _user$project$Main$load_player_data};
+		} else {
+			if (_p0._0.ctor === 'Ok') {
+				var _p8 = _p0._0._0;
+				var error = '';
+				var available_steps = function () {
+					var _p1 = A2(
+						_elm_lang$core$Json_Decode$decodeString,
+						A2(_elm_lang$core$Json_Decode$field, 'Available_steps', _elm_lang$core$Json_Decode$int),
+						_p8);
+					if (_p1.ctor === 'Ok') {
+						return _p1._0;
+					} else {
+						return -1;
+					}
+				}();
+				var resource_c = function () {
+					var _p2 = A2(
+						_elm_lang$core$Json_Decode$decodeString,
+						A2(_elm_lang$core$Json_Decode$field, 'Resource_C', _elm_lang$core$Json_Decode$int),
+						_p8);
+					if (_p2.ctor === 'Ok') {
+						return _p2._0;
+					} else {
+						return -1;
+					}
+				}();
+				var resource_b = function () {
+					var _p3 = A2(
+						_elm_lang$core$Json_Decode$decodeString,
+						A2(_elm_lang$core$Json_Decode$field, 'Resource_B', _elm_lang$core$Json_Decode$int),
+						_p8);
+					if (_p3.ctor === 'Ok') {
+						return _p3._0;
+					} else {
+						return -1;
+					}
+				}();
+				var resource_a = function () {
+					var _p4 = A2(
+						_elm_lang$core$Json_Decode$decodeString,
+						A2(_elm_lang$core$Json_Decode$field, 'Resource_A', _elm_lang$core$Json_Decode$int),
+						_p8);
+					if (_p4.ctor === 'Ok') {
+						return _p4._0;
+					} else {
+						return -1;
+					}
+				}();
+				var pos_y = function () {
+					var _p5 = A2(
+						_elm_lang$core$Json_Decode$decodeString,
+						A2(_elm_lang$core$Json_Decode$field, 'Pos_y', _elm_lang$core$Json_Decode$int),
+						_p8);
+					if (_p5.ctor === 'Ok') {
+						return _p5._0;
+					} else {
+						return -1;
+					}
+				}();
+				var pos_x = function () {
+					var _p6 = A2(
+						_elm_lang$core$Json_Decode$decodeString,
+						A2(_elm_lang$core$Json_Decode$field, 'Pos_x', _elm_lang$core$Json_Decode$int),
+						_p8);
+					if (_p6.ctor === 'Ok') {
+						return _p6._0;
+					} else {
+						return -1;
+					}
+				}();
+				var name = function () {
+					var _p7 = A2(
+						_elm_lang$core$Json_Decode$decodeString,
+						A2(_elm_lang$core$Json_Decode$field, 'Name', _elm_lang$core$Json_Decode$string),
+						_p8);
+					if (_p7.ctor === 'Ok') {
+						return _p7._0;
+					} else {
+						return 'error';
+					}
+				}();
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{name: name, pos_x: pos_x, pos_y: pos_y, resource_a: resource_a, resource_b: resource_b, resource_c: resource_c, available_steps: available_steps, error: error}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			} else {
+				var _p9 = _p0._0._0;
+				switch (_p9.ctor) {
+					case 'BadUrl':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{
+									error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p9._0)
+								}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					case 'Timeout':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{error: 'Timeout'}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					case 'NetworkError':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{error: 'NetworkError'}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					case 'BadStatus':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{error: 'BadStatus'}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					default:
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{error: 'BadPayload'}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+				}
+			}
+		}
+	});
+var _user$project$Main$LoadPlayerData = {ctor: 'LoadPlayerData'};
 var _user$project$Main$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -9535,28 +9612,31 @@ var _user$project$Main$view = function (model) {
 						{
 							ctor: '::',
 							_0: _user$project$Main$info_table(model),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$button,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$LoadPlayerData),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Load Data'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: _user$project$Main$error_message(model),
+									_1: {ctor: '[]'}
+								}
+							}
 						}),
 					_1: {ctor: '[]'}
 				}
 			}
 		});
-};
-var _user$project$Main$Model = F8(
-	function (a, b, c, d, e, f, g, h) {
-		return {name: a, pos_x: b, pos_y: c, resource_a: d, resource_b: e, resource_c: f, available_steps: g, error: h};
-	});
-var _user$project$Main$PlayerDataArrived = function (a) {
-	return {ctor: 'PlayerDataArrived', _0: a};
-};
-var _user$project$Main$load_player_data = A2(
-	_elm_lang$http$Http$send,
-	_user$project$Main$PlayerDataArrived,
-	_elm_lang$http$Http$getString('/get_data'));
-var _user$project$Main$init = {
-	ctor: '_Tuple2',
-	_0: A8(_user$project$Main$Model, '', 0, 0, 0, 0, 0, 0, ''),
-	_1: _user$project$Main$load_player_data
 };
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();

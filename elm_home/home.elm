@@ -23,8 +23,9 @@ init: (Model, Cmd Msg)
 init = (Model "" 0 0 0 0 0 0 "", load_player_data)
 
 --names of things that can happen
-type Msg = PlayerDataArrived (Result Http.Error String)
+type Msg = LoadPlayerData | PlayerDataArrived (Result Http.Error String)
 
+nav_bar: Html Msg
 nav_bar =
   nav [class "navbar navbar-inverse"]
   [ div [class "container-fluid"]
@@ -32,7 +33,7 @@ nav_bar =
       [ a [class "navbar-brand", href "/home"] [text "Browser Game"]
       ]
     , ul [class "nav navbar-nav"]
-      [ li [class "active"] [a [href "/home"] [text "Home"]]
+      [ li [class "active"] [a [href "/#"] [text "Home"]]
       , li [] [a [href "/world"] [text "World"]]
       ]
     , ul [class "nav navbar-nav navbar-right"]
@@ -68,6 +69,21 @@ info_table model =
           ]
         ]
 
+error_message: Model -> Html Msg
+error_message model =
+  if model.error=="" then
+    div [] []
+  else
+    div [class "alert alert-warning"] 
+    [ strong [] [text ("Warning! ("++model.error++")")]
+    , text " Data could not be read, please consider"
+    , a [href "/login", class "alert-link"] [text " logging in"]
+    , text " again."
+    ]
+
+
+
+
 --how it looks
 view: Model -> Html Msg
 view model =
@@ -76,7 +92,8 @@ view model =
   , nav_bar
   , div [class "container", style [("background-color", "#EFFFEF"), ("border-radius", "6px")]]
     [ info_table model
-    --, button [onClick BtnClick] [text "Load Data"]
+    , button [onClick LoadPlayerData] [text "Load Data"]
+    , error_message model
     ]
   ]
 
@@ -84,6 +101,7 @@ view model =
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
+        LoadPlayerData -> (model, load_player_data)
         PlayerDataArrived (Ok json_string) -> 
             let
                 name = case Decode.decodeString (Decode.field "Name" Decode.string) json_string of
@@ -107,6 +125,7 @@ update msg model =
                 available_steps = case Decode.decodeString (Decode.field "Available_steps" Decode.int) json_string of
                     Ok(x) -> x
                     Err(_) -> -1
+                error = ""
             in
                 ({model | name=name
                     , pos_x=pos_x
@@ -115,6 +134,7 @@ update msg model =
                     , resource_b=resource_b
                     , resource_c=resource_c
                     , available_steps=available_steps
+                    , error=error
                     }, Cmd.none)
         PlayerDataArrived (Err err) -> case err of 
             Http.BadUrl s -> ({model | error="BadUrl: "++s}, Cmd.none)
@@ -123,7 +143,6 @@ update msg model =
             Http.BadStatus _ -> ({model | error="BadStatus"}, Cmd.none)
             Http.BadPayload _ _ -> ({model | error="BadPayload"}, Cmd.none)
 
---("Error", Cmd.none)
 --events to be notified of
 subscriptions: Model -> Sub Msg
 subscriptions model=
