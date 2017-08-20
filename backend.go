@@ -24,6 +24,7 @@ const(
     player_data_file = "data/player_data.json"
     login_file = "files/login.html"
     home_file = "elm_home/index.html"
+    world_file = "elm_world/index.html"
     login_address = "/login"
     unlogin_address = "/unlogin"
     get_name_address = "/get_name"
@@ -31,6 +32,7 @@ const(
     get_world_address = "/get_world"
     root_address = "/"
     home_address = "/home"
+    world_address = "/world"
     cookie_name = "login_token"
 
     // time_slot_size = 12*time.Hour
@@ -290,6 +292,7 @@ func (h *HandlerForFile) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     w.Write(h.content)
 }
 
+// TODO: add counter to next time slot in home page
 // TODO: Log all errors in error log file
 // TODO: Thread safety for all maps
 //      actually, only maps that are modified on runtime
@@ -430,6 +433,16 @@ func main() {
         http.ServeFile(w, r, home_file)
     })
 
+    mux.HandleFunc(world_address, func (w http.ResponseWriter, r *http.Request){
+        _,err:=get_player_data(r)
+        if(err!=nil){
+            http.Redirect(w, r, login_address, http.StatusFound)
+            return
+        }
+
+        http.ServeFile(w, r, world_file)
+    })
+
     // Logs the player in
     mux.HandleFunc(login_address, func (w http.ResponseWriter, r *http.Request){
         if r.Method=="GET"{
@@ -468,6 +481,7 @@ func main() {
 
             //Get IP
             ip,err:=get_ip(r)
+            // If IP could not be gotten
             if err!=nil{
                 http.Error(w, "Weird address", http.StatusUnauthorized)
                 return
@@ -476,6 +490,7 @@ func main() {
             expiration:=time.Now().Add(login_lifetime)
             cookie_value:=fmt.Sprintf("%x/%x", <-rng, login_data.Id)
             player_data,ok:=player_map.get_player_data(login_data.Id)
+            // If there is inconsistency in internal data structures *login_map* and *player_map*
             if !ok{
                 panic("Internal error (player_data,ok:player_map.get_player_data(login_data.Id); !ok)")
             }

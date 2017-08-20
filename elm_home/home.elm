@@ -33,7 +33,7 @@ nav_bar =
       [ a [class "navbar-brand", href "/home"] [text "Browser Game"]
       ]
     , ul [class "nav navbar-nav"]
-      [ li [class "active"] [a [href "/#"] [text "Home"]]
+      [ li [class "active"] [a [href "/home"] [text "Home"]]
       , li [] [a [href "/world"] [text "World"]]
       ]
     , ul [class "nav navbar-nav navbar-right"]

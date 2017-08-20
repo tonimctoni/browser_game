@@ -8526,120 +8526,6 @@ var _elm_lang$html$Html_Attributes$classList = function (list) {
 				A2(_elm_lang$core$List$filter, _elm_lang$core$Tuple$second, list))));
 };
 var _elm_lang$html$Html_Attributes$style = _elm_lang$virtual_dom$VirtualDom$style;
-var _elm_lang$html$Html_Events$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
-var _elm_lang$html$Html_Events$targetChecked = A2(
-	_elm_lang$core$Json_Decode$at,
-	{
-		ctor: '::',
-		_0: 'target',
-		_1: {
-			ctor: '::',
-			_0: 'checked',
-			_1: {ctor: '[]'}
-		}
-	},
-	_elm_lang$core$Json_Decode$bool);
-var _elm_lang$html$Html_Events$targetValue = A2(
-	_elm_lang$core$Json_Decode$at,
-	{
-		ctor: '::',
-		_0: 'target',
-		_1: {
-			ctor: '::',
-			_0: 'value',
-			_1: {ctor: '[]'}
-		}
-	},
-	_elm_lang$core$Json_Decode$string);
-var _elm_lang$html$Html_Events$defaultOptions = _elm_lang$virtual_dom$VirtualDom$defaultOptions;
-var _elm_lang$html$Html_Events$onWithOptions = _elm_lang$virtual_dom$VirtualDom$onWithOptions;
-var _elm_lang$html$Html_Events$on = _elm_lang$virtual_dom$VirtualDom$on;
-var _elm_lang$html$Html_Events$onFocus = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'focus',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onBlur = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'blur',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onSubmitOptions = _elm_lang$core$Native_Utils.update(
-	_elm_lang$html$Html_Events$defaultOptions,
-	{preventDefault: true});
-var _elm_lang$html$Html_Events$onSubmit = function (msg) {
-	return A3(
-		_elm_lang$html$Html_Events$onWithOptions,
-		'submit',
-		_elm_lang$html$Html_Events$onSubmitOptions,
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onCheck = function (tagger) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'change',
-		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetChecked));
-};
-var _elm_lang$html$Html_Events$onInput = function (tagger) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'input',
-		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetValue));
-};
-var _elm_lang$html$Html_Events$onMouseOut = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseout',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseOver = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseover',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseLeave = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseleave',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseEnter = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseenter',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseUp = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mouseup',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onMouseDown = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'mousedown',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onDoubleClick = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'dblclick',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$onClick = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'click',
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_lang$html$Html_Events$Options = F2(
-	function (a, b) {
-		return {stopPropagation: a, preventDefault: b};
-	});
 var _elm_lang$http$Native_Http = function() {
 
 
@@ -9001,259 +8887,113 @@ var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
-var _user$project$Main$error_message = function (model) {
-	return _elm_lang$core$Native_Utils.eq(model.error, '') ? A2(
-		_elm_lang$html$Html$div,
-		{ctor: '[]'},
-		{ctor: '[]'}) : A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('alert alert-warning'),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$strong,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							'Warning! (',
-							A2(_elm_lang$core$Basics_ops['++'], model.error, ')'))),
-					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$html$Html$text(' Data could not be read, please consider'),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$a,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$href('/login'),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('alert-link'),
-								_1: {ctor: '[]'}
-							}
-						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(' logging in'),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(' again.'),
-						_1: {ctor: '[]'}
-					}
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		if (_p0._0.ctor === 'Ok') {
+			var _p5 = _p0._0._0;
+			var abundance_at_xy = function () {
+				var _p1 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Abundance_at_xy', _elm_lang$core$Json_Decode$int),
+					_p5);
+				if (_p1.ctor === 'Ok') {
+					return _p1._0;
+				} else {
+					return -1;
 				}
-			}
-		});
-};
-var _user$project$Main$info_table = function (model) {
-	return A2(
-		_elm_lang$html$Html$table,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('table table-condensed'),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$thead,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$tr,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$th,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text('name'),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$th,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('pos x'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$th,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('pos y'),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$th,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text('resource A'),
-												_1: {ctor: '[]'}
-											}),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$th,
-												{ctor: '[]'},
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html$text('resource B'),
-													_1: {ctor: '[]'}
-												}),
-											_1: {
-												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$th,
-													{ctor: '[]'},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text('resource C'),
-														_1: {ctor: '[]'}
-													}),
-												_1: {
-													ctor: '::',
-													_0: A2(
-														_elm_lang$html$Html$th,
-														{ctor: '[]'},
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html$text('available steps'),
-															_1: {ctor: '[]'}
-														}),
-													_1: {ctor: '[]'}
-												}
-											}
-										}
-									}
-								}
-							}
-						}),
-					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$tbody,
-					{ctor: '[]'},
-					{
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$tr,
-							{ctor: '[]'},
+			}();
+			var world = function () {
+				var _p2 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(
+						_elm_lang$core$Json_Decode$field,
+						'World_array',
+						_elm_lang$core$Json_Decode$array(_elm_lang$core$Json_Decode$int)),
+					_p5);
+				if (_p2.ctor === 'Ok') {
+					return _p2._0;
+				} else {
+					return _elm_lang$core$Array$empty;
+				}
+			}();
+			var pos_y = function () {
+				var _p3 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Pos_y', _elm_lang$core$Json_Decode$int),
+					_p5);
+				if (_p3.ctor === 'Ok') {
+					return _p3._0;
+				} else {
+					return -1;
+				}
+			}();
+			var pos_x = function () {
+				var _p4 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Pos_x', _elm_lang$core$Json_Decode$int),
+					_p5);
+				if (_p4.ctor === 'Ok') {
+					return _p4._0;
+				} else {
+					return -1;
+				}
+			}();
+			return {
+				ctor: '_Tuple2',
+				_0: _elm_lang$core$Native_Utils.update(
+					model,
+					{pos_x: pos_x, pos_y: pos_y, world: world, abundance_at_xy: abundance_at_xy}),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
+		} else {
+			var _p6 = _p0._0._0;
+			switch (_p6.ctor) {
+				case 'BadUrl':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
 							{
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$td,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text(model.name),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$td,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text(
-												_elm_lang$core$Basics$toString(model.pos_x)),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$td,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text(
-													_elm_lang$core$Basics$toString(model.pos_y)),
-												_1: {ctor: '[]'}
-											}),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$td,
-												{ctor: '[]'},
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html$text(
-														_elm_lang$core$Basics$toString(model.resource_a)),
-													_1: {ctor: '[]'}
-												}),
-											_1: {
-												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$td,
-													{ctor: '[]'},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text(
-															_elm_lang$core$Basics$toString(model.resource_b)),
-														_1: {ctor: '[]'}
-													}),
-												_1: {
-													ctor: '::',
-													_0: A2(
-														_elm_lang$html$Html$td,
-														{ctor: '[]'},
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html$text(
-																_elm_lang$core$Basics$toString(model.resource_c)),
-															_1: {ctor: '[]'}
-														}),
-													_1: {
-														ctor: '::',
-														_0: A2(
-															_elm_lang$html$Html$td,
-															{ctor: '[]'},
-															{
-																ctor: '::',
-																_0: _elm_lang$html$Html$text(
-																	_elm_lang$core$Basics$toString(model.available_steps)),
-																_1: {ctor: '[]'}
-															}),
-														_1: {ctor: '[]'}
-													}
-												}
-											}
-										}
-									}
-								}
+								error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p6._0)
 							}),
-						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'Timeout':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{error: 'Timeout'}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'NetworkError':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{error: 'NetworkError'}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'BadStatus':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{error: 'BadStatus'}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				default:
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{error: 'BadPayload'}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
 			}
-		});
-};
+		}
+	});
 var _user$project$Main$nav_bar = A2(
 	_elm_lang$html$Html$nav,
 	{
@@ -9312,11 +9052,7 @@ var _user$project$Main$nav_bar = A2(
 							ctor: '::',
 							_0: A2(
 								_elm_lang$html$Html$li,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('active'),
-									_1: {ctor: '[]'}
-								},
+								{ctor: '[]'},
 								{
 									ctor: '::',
 									_0: A2(
@@ -9337,7 +9073,11 @@ var _user$project$Main$nav_bar = A2(
 								ctor: '::',
 								_0: A2(
 									_elm_lang$html$Html$li,
-									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('active'),
+										_1: {ctor: '[]'}
+									},
 									{
 										ctor: '::',
 										_0: A2(
@@ -9406,165 +9146,397 @@ var _user$project$Main$nav_bar = A2(
 			}),
 		_1: {ctor: '[]'}
 	});
-var _user$project$Main$Model = F8(
-	function (a, b, c, d, e, f, g, h) {
-		return {name: a, pos_x: b, pos_y: c, resource_a: d, resource_b: e, resource_c: f, available_steps: g, error: h};
+var _user$project$Main$Model = F5(
+	function (a, b, c, d, e) {
+		return {pos_x: a, pos_y: b, world: c, abundance_at_xy: d, error: e};
 	});
-var _user$project$Main$PlayerDataArrived = function (a) {
-	return {ctor: 'PlayerDataArrived', _0: a};
+var _user$project$Main$WorldDataArrived = function (a) {
+	return {ctor: 'WorldDataArrived', _0: a};
 };
-var _user$project$Main$load_player_data = A2(
+var _user$project$Main$load_world_data = A2(
 	_elm_lang$http$Http$send,
-	_user$project$Main$PlayerDataArrived,
-	_elm_lang$http$Http$getString('/get_data'));
+	_user$project$Main$WorldDataArrived,
+	_elm_lang$http$Http$getString('/get_world'));
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
-	_0: A8(_user$project$Main$Model, '', 0, 0, 0, 0, 0, 0, ''),
-	_1: _user$project$Main$load_player_data
+	_0: A5(_user$project$Main$Model, 0, 0, _elm_lang$core$Array$empty, 0, ''),
+	_1: _user$project$Main$load_world_data
 };
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p0 = msg;
-		if (_p0.ctor === 'LoadPlayerData') {
-			return {ctor: '_Tuple2', _0: model, _1: _user$project$Main$load_player_data};
-		} else {
-			if (_p0._0.ctor === 'Ok') {
-				var _p8 = _p0._0._0;
-				var error = '';
-				var available_steps = function () {
-					var _p1 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Available_steps', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p1.ctor === 'Ok') {
-						return _p1._0;
-					} else {
-						return -1;
+var _user$project$Main$CurrentBorder = {ctor: 'CurrentBorder'};
+var _user$project$Main$NormalBorder = {ctor: 'NormalBorder'};
+var _user$project$Main$NoBorder = {ctor: 'NoBorder'};
+var _user$project$Main$get_tile = F2(
+	function (border_style, mi) {
+		var the_style = _elm_lang$core$Native_Utils.eq(border_style, _user$project$Main$NoBorder) ? _elm_lang$html$Html_Attributes$style(
+			{
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'margin', _1: '4px'},
+				_1: {ctor: '[]'}
+			}) : (_elm_lang$core$Native_Utils.eq(border_style, _user$project$Main$NormalBorder) ? _elm_lang$html$Html_Attributes$style(
+			{
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'margin', _1: '2px'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'border-style', _1: 'solid'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'border-width', _1: '2px'},
+						_1: {ctor: '[]'}
 					}
-				}();
-				var resource_c = function () {
-					var _p2 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Resource_C', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p2.ctor === 'Ok') {
-						return _p2._0;
-					} else {
-						return -1;
-					}
-				}();
-				var resource_b = function () {
-					var _p3 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Resource_B', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p3.ctor === 'Ok') {
-						return _p3._0;
-					} else {
-						return -1;
-					}
-				}();
-				var resource_a = function () {
-					var _p4 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Resource_A', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p4.ctor === 'Ok') {
-						return _p4._0;
-					} else {
-						return -1;
-					}
-				}();
-				var pos_y = function () {
-					var _p5 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Pos_y', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p5.ctor === 'Ok') {
-						return _p5._0;
-					} else {
-						return -1;
-					}
-				}();
-				var pos_x = function () {
-					var _p6 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Pos_x', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p6.ctor === 'Ok') {
-						return _p6._0;
-					} else {
-						return -1;
-					}
-				}();
-				var name = function () {
-					var _p7 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Name', _elm_lang$core$Json_Decode$string),
-						_p8);
-					if (_p7.ctor === 'Ok') {
-						return _p7._0;
-					} else {
-						return 'error';
-					}
-				}();
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{name: name, pos_x: pos_x, pos_y: pos_y, resource_a: resource_a, resource_b: resource_b, resource_c: resource_c, available_steps: available_steps, error: error}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			} else {
-				var _p9 = _p0._0._0;
-				switch (_p9.ctor) {
-					case 'BadUrl':
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{
-									error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p9._0)
-								}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-					case 'Timeout':
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{error: 'Timeout'}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-					case 'NetworkError':
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{error: 'NetworkError'}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-					case 'BadStatus':
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{error: 'BadStatus'}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-					default:
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{error: 'BadPayload'}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
 				}
+			}) : (_elm_lang$core$Native_Utils.eq(border_style, _user$project$Main$CurrentBorder) ? _elm_lang$html$Html_Attributes$style(
+			{
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'margin', _1: '2px'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'border-style', _1: 'solid'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'border-width', _1: '2px'},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'border-color', _1: 'blue'},
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			}) : _elm_lang$html$Html_Attributes$style(
+			{ctor: '[]'})));
+		var _p7 = mi;
+		if (_p7.ctor === 'Nothing') {
+			return A2(
+				_elm_lang$html$Html$img,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$src('/files/empty.png'),
+					_1: {
+						ctor: '::',
+						_0: the_style,
+						_1: {ctor: '[]'}
+					}
+				},
+				{ctor: '[]'});
+		} else {
+			switch (_p7._0) {
+				case 0:
+					return A2(
+						_elm_lang$html$Html$img,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$src('/files/no_resource.png'),
+							_1: {
+								ctor: '::',
+								_0: the_style,
+								_1: {ctor: '[]'}
+							}
+						},
+						{ctor: '[]'});
+				case 1:
+					return A2(
+						_elm_lang$html$Html$img,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$src('/files/resource_a.png'),
+							_1: {
+								ctor: '::',
+								_0: the_style,
+								_1: {ctor: '[]'}
+							}
+						},
+						{ctor: '[]'});
+				case 2:
+					return A2(
+						_elm_lang$html$Html$img,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$src('/files/resource_b.png'),
+							_1: {
+								ctor: '::',
+								_0: the_style,
+								_1: {ctor: '[]'}
+							}
+						},
+						{ctor: '[]'});
+				case 3:
+					return A2(
+						_elm_lang$html$Html$img,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$src('/files/resource_c.png'),
+							_1: {
+								ctor: '::',
+								_0: the_style,
+								_1: {ctor: '[]'}
+							}
+						},
+						{ctor: '[]'});
+				default:
+					return A2(
+						_elm_lang$html$Html$img,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$src('/files/empty.png'),
+							_1: {
+								ctor: '::',
+								_0: the_style,
+								_1: {ctor: '[]'}
+							}
+						},
+						{ctor: '[]'});
 			}
 		}
 	});
-var _user$project$Main$LoadPlayerData = {ctor: 'LoadPlayerData'};
+var _user$project$Main$world_map = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$style(
+						{
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'float', _1: 'center'},
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(_user$project$Main$get_tile, _user$project$Main$NoBorder, _elm_lang$core$Maybe$Nothing),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_user$project$Main$get_tile,
+							_user$project$Main$NormalBorder,
+							A2(_elm_lang$core$Array$get, 0, model.world)),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_user$project$Main$get_tile,
+								_user$project$Main$NormalBorder,
+								A2(_elm_lang$core$Array$get, 1, model.world)),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_user$project$Main$get_tile,
+									_user$project$Main$NormalBorder,
+									A2(_elm_lang$core$Array$get, 2, model.world)),
+								_1: {
+									ctor: '::',
+									_0: A2(_user$project$Main$get_tile, _user$project$Main$NoBorder, _elm_lang$core$Maybe$Nothing),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$style(
+							{
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'float', _1: 'center'},
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_user$project$Main$get_tile,
+							_user$project$Main$NormalBorder,
+							A2(_elm_lang$core$Array$get, 3, model.world)),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_user$project$Main$get_tile,
+								_user$project$Main$NormalBorder,
+								A2(_elm_lang$core$Array$get, 4, model.world)),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_user$project$Main$get_tile,
+									_user$project$Main$NormalBorder,
+									A2(_elm_lang$core$Array$get, 5, model.world)),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_user$project$Main$get_tile,
+										_user$project$Main$NormalBorder,
+										A2(_elm_lang$core$Array$get, 6, model.world)),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_user$project$Main$get_tile,
+											_user$project$Main$NormalBorder,
+											A2(_elm_lang$core$Array$get, 7, model.world)),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$style(
+								{
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'float', _1: 'center'},
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_user$project$Main$get_tile,
+								_user$project$Main$NormalBorder,
+								A2(_elm_lang$core$Array$get, 8, model.world)),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_user$project$Main$get_tile,
+									_user$project$Main$NormalBorder,
+									A2(_elm_lang$core$Array$get, 9, model.world)),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_user$project$Main$get_tile,
+										_user$project$Main$CurrentBorder,
+										A2(_elm_lang$core$Array$get, 10, model.world)),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_user$project$Main$get_tile,
+											_user$project$Main$NormalBorder,
+											A2(_elm_lang$core$Array$get, 11, model.world)),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_user$project$Main$get_tile,
+												_user$project$Main$NormalBorder,
+												A2(_elm_lang$core$Array$get, 12, model.world)),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$style(
+									{
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'float', _1: 'center'},
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_user$project$Main$get_tile,
+									_user$project$Main$NormalBorder,
+									A2(_elm_lang$core$Array$get, 13, model.world)),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_user$project$Main$get_tile,
+										_user$project$Main$NormalBorder,
+										A2(_elm_lang$core$Array$get, 14, model.world)),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_user$project$Main$get_tile,
+											_user$project$Main$NormalBorder,
+											A2(_elm_lang$core$Array$get, 15, model.world)),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_user$project$Main$get_tile,
+												_user$project$Main$NormalBorder,
+												A2(_elm_lang$core$Array$get, 16, model.world)),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_user$project$Main$get_tile,
+													_user$project$Main$NormalBorder,
+													A2(_elm_lang$core$Array$get, 17, model.world)),
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$style(
+										{
+											ctor: '::',
+											_0: {ctor: '_Tuple2', _0: 'float', _1: 'center'},
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(_user$project$Main$get_tile, _user$project$Main$NoBorder, _elm_lang$core$Maybe$Nothing),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_user$project$Main$get_tile,
+											_user$project$Main$NormalBorder,
+											A2(_elm_lang$core$Array$get, 18, model.world)),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_user$project$Main$get_tile,
+												_user$project$Main$NormalBorder,
+												A2(_elm_lang$core$Array$get, 19, model.world)),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_user$project$Main$get_tile,
+													_user$project$Main$NormalBorder,
+													A2(_elm_lang$core$Array$get, 20, model.world)),
+												_1: {
+													ctor: '::',
+													_0: A2(_user$project$Main$get_tile, _user$project$Main$NoBorder, _elm_lang$core$Maybe$Nothing),
+													_1: {ctor: '[]'}
+												}
+											}
+										}
+									}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			}
+		});
+};
 var _user$project$Main$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -9611,27 +9583,8 @@ var _user$project$Main$view = function (model) {
 						},
 						{
 							ctor: '::',
-							_0: _user$project$Main$info_table(model),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$button,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$LoadPlayerData),
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('Load Data'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: _user$project$Main$error_message(model),
-									_1: {ctor: '[]'}
-								}
-							}
+							_0: _user$project$Main$world_map(model),
+							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
 				}
