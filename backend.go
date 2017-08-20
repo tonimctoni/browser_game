@@ -17,18 +17,20 @@ import "crypto/rand"
 
 const(
     login_lifetime time.Duration = 2*time.Hour
+    available_files_dir = "files"
+    available_files_address = "files"
     world_seed_file = "data/world_seed"
     login_data_file = "data/login_data.json"
     player_data_file = "data/player_data.json"
     login_file = "files/login.html"
-    default_file = "elm_default/index.html"
+    home_file = "elm_home/index.html"
     login_address = "/login"
     unlogin_address = "/unlogin"
     get_name_address = "/get_name"
     get_data_address = "/get_data"
     get_world_address = "/get_world"
     root_address = "/"
-    default_address = "/default"
+    home_address = "/home"
     cookie_name = "login_token"
 
     // time_slot_size = 12*time.Hour
@@ -60,6 +62,8 @@ func (m *MySource) Int63() int64{
     return int64(m.state[0]) | (int64(m.state[1]) << 8) | (int64(m.state[2]) << 16) | (int64(m.state[3]) << 24) |
         (int64(m.state[4]) << 32) | (int64(m.state[5]) << 40) | (int64(m.state[6]) << 48) | (int64(m.state[7]) << 56)
 }
+
+
 
 type World struct{
     seed []byte
@@ -116,6 +120,8 @@ func (w *World) get_fields_static_data(x,y int64) (byte, byte){
     }
     // w.cache_rwlock.Unlock()
 }
+
+
 
 type LoginData struct{
     Id uint64
@@ -212,7 +218,7 @@ func (l *LoginMap) get_login_data(login_name string) (*LoginData, bool){
 
 type PlayerMap struct{
     player_map map[uint64]*PlayerData // (user_id -> his ingame player data)
-    player_data_modification_lock *sync.Mutex
+    // player_data_modification_lock *sync.Mutex
 }
 
 // This handles the reading of user player data from disk
@@ -239,7 +245,7 @@ func load_PlayerMap() PlayerMap{
         player_map[player_data[i].Id]=&player_data[i]
     }
 
-    return PlayerMap{player_map, &sync.Mutex{}}
+    return PlayerMap{player_map} // , &sync.Mutex{}
 }
 
 // func (p *PlayerMap) i_will_modify_player_data(){
@@ -272,6 +278,16 @@ func check_data_integrity(LM LoginMap, PM PlayerMap){
             }
         }
     }
+}
+
+type HandlerForFile struct{
+    content []byte
+    content_type string
+}
+
+func (h *HandlerForFile) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", h.content_type)
+    w.Write(h.content)
 }
 
 // TODO: Log all errors in error log file
@@ -362,6 +378,38 @@ func main() {
     }
 
     mux := http.NewServeMux()
+
+    // Makes all files in directory *available_files_dir* available for get request
+    files, err:=ioutil.ReadDir(available_files_dir)
+    if err!=nil{
+        panic("Could not read directory of available files")
+    }
+    for _, file := range files {
+        path:=fmt.Sprintf("%s/%s", available_files_dir, file.Name())
+        content, err:=ioutil.ReadFile(path)
+        if err!=nil{
+            panic(err.Error())
+        }
+
+        content_type:=func() string{
+            if strings.HasSuffix(file.Name(), ".html"){
+                return "text/html"
+            }else if strings.HasSuffix(file.Name(), ".jpg"){
+                return "image/jpeg"
+            }else if strings.HasSuffix(file.Name(), ".css"){
+                return "text/css"
+            }else if strings.HasSuffix(file.Name(), ".png"){
+                return "image/png"
+            }else if strings.HasSuffix(file.Name(), ".ico"){
+                return "image/x-icon"
+            } else{
+                return ""
+            }
+        }()
+
+        mux.Handle(fmt.Sprintf("/%s/%s", available_files_address, file.Name()), &HandlerForFile{content, content_type})
+    }
+
     mux.HandleFunc(root_address, func (w http.ResponseWriter, r *http.Request){
         _,err:=get_player_data(r)
         if(err!=nil){
@@ -369,19 +417,20 @@ func main() {
             return
         }
 
-        http.Redirect(w, r, default_address, http.StatusFound)
+        http.Redirect(w, r, home_address, http.StatusFound)
     })
 
-    mux.HandleFunc(default_address, func (w http.ResponseWriter, r *http.Request){
+    mux.HandleFunc(home_address, func (w http.ResponseWriter, r *http.Request){
         _,err:=get_player_data(r)
         if(err!=nil){
             http.Redirect(w, r, login_address, http.StatusFound)
             return
         }
 
-        http.ServeFile(w, r, default_file)
+        http.ServeFile(w, r, home_file)
     })
 
+    // Logs the player in
     mux.HandleFunc(login_address, func (w http.ResponseWriter, r *http.Request){
         if r.Method=="GET"{
             http.ServeFile(w, r, login_file)
@@ -397,7 +446,6 @@ func main() {
             }
 
             // If user does not exist
-            // login_data,ok:=login_map[username]
             login_data,ok:=login_map.get_login_data(username)
             if !ok{
                 http.Error(w, "Invalid login", http.StatusUnauthorized)
@@ -444,6 +492,7 @@ func main() {
         }
     })
 
+    // Logs the player out
     mux.HandleFunc(unlogin_address, func (w http.ResponseWriter, r *http.Request){
         expiration:=time.Now().Add(-login_lifetime)
         cookie:=http.Cookie{Name: cookie_name, Value: "Value", Expires: expiration}
@@ -473,6 +522,7 @@ func main() {
     //     w.Write([]byte(player_data.Name))
     // })
 
+    // Gives a player his player data
     mux.HandleFunc(get_data_address, func (w http.ResponseWriter, r *http.Request){
         player_data,err:=get_player_data(r)
         if(err!=nil){
@@ -490,6 +540,7 @@ func main() {
         w.Write(json_player_data)
     })
 
+    // Gives a player a map of the fields near him
     mux.HandleFunc(get_world_address, func (w http.ResponseWriter, r *http.Request){
         player_data,err:=get_player_data(r)
         if(err!=nil){

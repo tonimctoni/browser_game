@@ -1,4 +1,5 @@
-import Html exposing (Html, div, text, program, button)
+import Html exposing (Html, div, text, program, button, node, table, thead, tr, th, tbody, td)
+import Html.Attributes exposing (rel, href, class, style)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode
@@ -28,19 +29,47 @@ type Msg = BtnClick | HttpDataArrived (Result Http.Error String)
 --how it looks
 view: Model -> Html Msg
 view model =
-    div []
-        [button [onClick BtnClick] [text "Add A"]
-        , Html.p [] [text model.name]
-        , Html.p [] [model.pos_x |> toString |> text, ", " |> text, model.pos_y |> toString |> text]
-        , Html.p [] [model.pos_y |> toString |> text]
-        , Html.p [] [model.error |> text]
+    div [class "container"]
+    [ node "link" [ rel "stylesheet", href "/files/bootstrap.min.css"] []
+    , table [class "table table-condensed"]
+      [ thead []
+        [ tr []
+          [ th [] [text "name"]
+          , th [] [text "pos x"]
+          , th [] [text "pos y"]
+          , th [] [text "resource A"]
+          , th [] [text "resource B"]
+          , th [] [text "resource C"]
+          , th [] [text "available steps"]
+          ]
         ]
+      , tbody []
+        [ tr []
+          [ td [] [model.name |> text]
+          , td [] [model.pos_x |> toString |> text]
+          , td [] [model.pos_y |> toString |> text]
+          , td [] [model.resource_a |> toString |> text]
+          , td [] [model.resource_b |> toString |> text]
+          , td [] [model.resource_c |> toString |> text]
+          , td [] [model.available_steps |> toString |> text]
+          ]
+        ]
+      ]
+    , button [onClick BtnClick] [text "Load Data"]
+    ]
+        --[button [onClick BtnClick] [text "Add A"]
+
+        --, Html.p [] [text model.name]
+        --, Html.p [] [model.pos_x |> toString |> text, ", " |> text, model.pos_y |> toString |> text]
+        --, Html.p [] [model.pos_y |> toString |> text]
+        --, Html.p [] [model.error |> text]
+        --]
 
 --what to do if a thing happens
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        BtnClick -> (model, Http.send HttpDataArrived (Http.getString "http://localhost:8000/get_data"))
+        BtnClick -> (model, Http.send HttpDataArrived (Http.getString "/get_data"))
         HttpDataArrived (Ok json_string) -> 
             let
                 name = case Decode.decodeString (Decode.field "Name" Decode.string) json_string of
