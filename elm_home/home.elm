@@ -1,5 +1,5 @@
-import Html exposing (Html, div, text, program, button, node, table, thead, tr, th, tbody, td)
-import Html.Attributes exposing (rel, href, class, style)
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode
@@ -15,62 +15,76 @@ type alias Model =
   , available_steps : Int
   , error : String
   }
+
+load_player_data: Cmd Msg
+load_player_data = Http.send PlayerDataArrived (Http.getString "/get_data")
+
 init: (Model, Cmd Msg)
-init = (Model "" 0 0 0 0 0 0 "", Cmd.none)
+init = (Model "" 0 0 0 0 0 0 "", load_player_data)
 
 --names of things that can happen
-type Msg = BtnClick | HttpDataArrived (Result Http.Error String)
+type Msg = PlayerDataArrived (Result Http.Error String)
 
---my_functions
---get_http_data : Cmd Msg
---get_http_data = Http.send HttpDataArrived (Http.get "http://localhost:8000/get_data" (Decode.at ["Name"] Decode.string))
---get_http_data = Http.send HttpDataArrived (Http.getString "http://localhost:8000/get_data")
+nav_bar =
+  nav [class "navbar navbar-inverse"]
+  [ div [class "container-fluid"]
+    [ div [class "navbar-header"]
+      [ a [class "navbar-brand", href "/home"] [text "Browser Game"]
+      ]
+    , ul [class "nav navbar-nav"]
+      [ li [class "active"] [a [href "/home"] [text "Home"]]
+      , li [] [a [href "/world"] [text "World"]]
+      ]
+    , ul [class "nav navbar-nav navbar-right"]
+      [ li [] [a [href "/unlogin"] [span [class "glyphicon glyphicon-log-out"] [], text " Unlogin"]]
+      ]
+    ]
+  ]
+
+info_table: Model -> Html Msg
+info_table model =
+  table [class "table table-condensed"]
+        [ thead []
+          [ tr []
+            [ th [] [text "name"]
+            , th [] [text "pos x"]
+            , th [] [text "pos y"]
+            , th [] [text "resource A"]
+            , th [] [text "resource B"]
+            , th [] [text "resource C"]
+            , th [] [text "available steps"]
+            ]
+          ]
+        , tbody []
+          [ tr []
+            [ td [] [model.name |> text]
+            , td [] [model.pos_x |> toString |> text]
+            , td [] [model.pos_y |> toString |> text]
+            , td [] [model.resource_a |> toString |> text]
+            , td [] [model.resource_b |> toString |> text]
+            , td [] [model.resource_c |> toString |> text]
+            , td [] [model.available_steps |> toString |> text]
+            ]
+          ]
+        ]
 
 --how it looks
 view: Model -> Html Msg
 view model =
-    div [class "container"]
-    [ node "link" [ rel "stylesheet", href "/files/bootstrap.min.css"] []
-    , table [class "table table-condensed"]
-      [ thead []
-        [ tr []
-          [ th [] [text "name"]
-          , th [] [text "pos x"]
-          , th [] [text "pos y"]
-          , th [] [text "resource A"]
-          , th [] [text "resource B"]
-          , th [] [text "resource C"]
-          , th [] [text "available steps"]
-          ]
-        ]
-      , tbody []
-        [ tr []
-          [ td [] [model.name |> text]
-          , td [] [model.pos_x |> toString |> text]
-          , td [] [model.pos_y |> toString |> text]
-          , td [] [model.resource_a |> toString |> text]
-          , td [] [model.resource_b |> toString |> text]
-          , td [] [model.resource_c |> toString |> text]
-          , td [] [model.available_steps |> toString |> text]
-          ]
-        ]
-      ]
-    , button [onClick BtnClick] [text "Load Data"]
+  div []
+  [ node "link" [ rel "stylesheet", href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"] []
+  , nav_bar
+  , div [class "container", style [("background-color", "#EFFFEF"), ("border-radius", "6px")]]
+    [ info_table model
+    --, button [onClick BtnClick] [text "Load Data"]
     ]
-        --[button [onClick BtnClick] [text "Add A"]
-
-        --, Html.p [] [text model.name]
-        --, Html.p [] [model.pos_x |> toString |> text, ", " |> text, model.pos_y |> toString |> text]
-        --, Html.p [] [model.pos_y |> toString |> text]
-        --, Html.p [] [model.error |> text]
-        --]
+  ]
 
 --what to do if a thing happens
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        BtnClick -> (model, Http.send HttpDataArrived (Http.getString "/get_data"))
-        HttpDataArrived (Ok json_string) -> 
+        PlayerDataArrived (Ok json_string) -> 
             let
                 name = case Decode.decodeString (Decode.field "Name" Decode.string) json_string of
                     Ok(x) -> x
@@ -81,13 +95,13 @@ update msg model =
                 pos_y = case Decode.decodeString (Decode.field "Pos_y" Decode.int) json_string of
                     Ok(x) -> x
                     Err(_) -> -1
-                resource_a = case Decode.decodeString (Decode.field "Resource_a" Decode.int) json_string of
+                resource_a = case Decode.decodeString (Decode.field "Resource_A" Decode.int) json_string of
                     Ok(x) -> x
                     Err(_) -> -1
-                resource_b = case Decode.decodeString (Decode.field "Resource_b" Decode.int) json_string of
+                resource_b = case Decode.decodeString (Decode.field "Resource_B" Decode.int) json_string of
                     Ok(x) -> x
                     Err(_) -> -1
-                resource_c = case Decode.decodeString (Decode.field "Resource_c" Decode.int) json_string of
+                resource_c = case Decode.decodeString (Decode.field "Resource_C" Decode.int) json_string of
                     Ok(x) -> x
                     Err(_) -> -1
                 available_steps = case Decode.decodeString (Decode.field "Available_steps" Decode.int) json_string of
@@ -102,7 +116,7 @@ update msg model =
                     , resource_c=resource_c
                     , available_steps=available_steps
                     }, Cmd.none)
-        HttpDataArrived (Err err) -> case err of 
+        PlayerDataArrived (Err err) -> case err of 
             Http.BadUrl s -> ({model | error="BadUrl: "++s}, Cmd.none)
             Http.Timeout -> ({model | error="Timeout"}, Cmd.none)
             Http.NetworkError -> ({model | error="NetworkError"}, Cmd.none)

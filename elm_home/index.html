@@ -9001,232 +9001,209 @@ var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
-var _user$project$Main$Model = F8(
-	function (a, b, c, d, e, f, g, h) {
-		return {name: a, pos_x: b, pos_y: c, resource_a: d, resource_b: e, resource_c: f, available_steps: g, error: h};
-	});
-var _user$project$Main$init = {
-	ctor: '_Tuple2',
-	_0: A8(_user$project$Main$Model, '', 0, 0, 0, 0, 0, 0, ''),
-	_1: _elm_lang$core$Platform_Cmd$none
-};
-var _user$project$Main$HttpDataArrived = function (a) {
-	return {ctor: 'HttpDataArrived', _0: a};
-};
 var _user$project$Main$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
-		if (_p0.ctor === 'BtnClick') {
+		if (_p0._0.ctor === 'Ok') {
+			var _p8 = _p0._0._0;
+			var available_steps = function () {
+				var _p1 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Available_steps', _elm_lang$core$Json_Decode$int),
+					_p8);
+				if (_p1.ctor === 'Ok') {
+					return _p1._0;
+				} else {
+					return -1;
+				}
+			}();
+			var resource_c = function () {
+				var _p2 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Resource_C', _elm_lang$core$Json_Decode$int),
+					_p8);
+				if (_p2.ctor === 'Ok') {
+					return _p2._0;
+				} else {
+					return -1;
+				}
+			}();
+			var resource_b = function () {
+				var _p3 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Resource_B', _elm_lang$core$Json_Decode$int),
+					_p8);
+				if (_p3.ctor === 'Ok') {
+					return _p3._0;
+				} else {
+					return -1;
+				}
+			}();
+			var resource_a = function () {
+				var _p4 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Resource_A', _elm_lang$core$Json_Decode$int),
+					_p8);
+				if (_p4.ctor === 'Ok') {
+					return _p4._0;
+				} else {
+					return -1;
+				}
+			}();
+			var pos_y = function () {
+				var _p5 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Pos_y', _elm_lang$core$Json_Decode$int),
+					_p8);
+				if (_p5.ctor === 'Ok') {
+					return _p5._0;
+				} else {
+					return -1;
+				}
+			}();
+			var pos_x = function () {
+				var _p6 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Pos_x', _elm_lang$core$Json_Decode$int),
+					_p8);
+				if (_p6.ctor === 'Ok') {
+					return _p6._0;
+				} else {
+					return -1;
+				}
+			}();
+			var name = function () {
+				var _p7 = A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					A2(_elm_lang$core$Json_Decode$field, 'Name', _elm_lang$core$Json_Decode$string),
+					_p8);
+				if (_p7.ctor === 'Ok') {
+					return _p7._0;
+				} else {
+					return 'error';
+				}
+			}();
 			return {
 				ctor: '_Tuple2',
-				_0: model,
-				_1: A2(
-					_elm_lang$http$Http$send,
-					_user$project$Main$HttpDataArrived,
-					_elm_lang$http$Http$getString('/get_data'))
+				_0: _elm_lang$core$Native_Utils.update(
+					model,
+					{name: name, pos_x: pos_x, pos_y: pos_y, resource_a: resource_a, resource_b: resource_b, resource_c: resource_c, available_steps: available_steps}),
+				_1: _elm_lang$core$Platform_Cmd$none
 			};
 		} else {
-			if (_p0._0.ctor === 'Ok') {
-				var _p8 = _p0._0._0;
-				var available_steps = function () {
-					var _p1 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Available_steps', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p1.ctor === 'Ok') {
-						return _p1._0;
-					} else {
-						return -1;
-					}
-				}();
-				var resource_c = function () {
-					var _p2 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Resource_c', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p2.ctor === 'Ok') {
-						return _p2._0;
-					} else {
-						return -1;
-					}
-				}();
-				var resource_b = function () {
-					var _p3 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Resource_b', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p3.ctor === 'Ok') {
-						return _p3._0;
-					} else {
-						return -1;
-					}
-				}();
-				var resource_a = function () {
-					var _p4 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Resource_a', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p4.ctor === 'Ok') {
-						return _p4._0;
-					} else {
-						return -1;
-					}
-				}();
-				var pos_y = function () {
-					var _p5 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Pos_y', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p5.ctor === 'Ok') {
-						return _p5._0;
-					} else {
-						return -1;
-					}
-				}();
-				var pos_x = function () {
-					var _p6 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Pos_x', _elm_lang$core$Json_Decode$int),
-						_p8);
-					if (_p6.ctor === 'Ok') {
-						return _p6._0;
-					} else {
-						return -1;
-					}
-				}();
-				var name = function () {
-					var _p7 = A2(
-						_elm_lang$core$Json_Decode$decodeString,
-						A2(_elm_lang$core$Json_Decode$field, 'Name', _elm_lang$core$Json_Decode$string),
-						_p8);
-					if (_p7.ctor === 'Ok') {
-						return _p7._0;
-					} else {
-						return 'error';
-					}
-				}();
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{name: name, pos_x: pos_x, pos_y: pos_y, resource_a: resource_a, resource_b: resource_b, resource_c: resource_c, available_steps: available_steps}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			} else {
-				var _p9 = _p0._0._0;
-				switch (_p9.ctor) {
-					case 'BadUrl':
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{
-									error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p9._0)
-								}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-					case 'Timeout':
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{error: 'Timeout'}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-					case 'NetworkError':
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{error: 'NetworkError'}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-					case 'BadStatus':
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{error: 'BadStatus'}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-					default:
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{error: 'BadPayload'}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-				}
+			var _p9 = _p0._0._0;
+			switch (_p9.ctor) {
+				case 'BadUrl':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p9._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'Timeout':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{error: 'Timeout'}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'NetworkError':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{error: 'NetworkError'}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'BadStatus':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{error: 'BadStatus'}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				default:
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{error: 'BadPayload'}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
 			}
 		}
 	});
-var _user$project$Main$BtnClick = {ctor: 'BtnClick'};
-var _user$project$Main$view = function (model) {
+var _user$project$Main$info_table = function (model) {
 	return A2(
-		_elm_lang$html$Html$div,
+		_elm_lang$html$Html$table,
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('container'),
+			_0: _elm_lang$html$Html_Attributes$class('table table-condensed'),
 			_1: {ctor: '[]'}
 		},
 		{
 			ctor: '::',
-			_0: A3(
-				_elm_lang$html$Html$node,
-				'link',
+			_0: A2(
+				_elm_lang$html$Html$thead,
+				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$rel('stylesheet'),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$href('/files/bootstrap.min.css'),
-						_1: {ctor: '[]'}
-					}
-				},
-				{ctor: '[]'}),
-			_1: {
-				ctor: '::',
-				_0: A3(
-					_elm_lang$html$Html$node,
-					'link',
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$rel('stylesheet'),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$href('/files/my.css'),
-							_1: {ctor: '[]'}
-						}
-					},
-					{ctor: '[]'}),
-				_1: {
-					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$table,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('table table-condensed'),
-							_1: {ctor: '[]'}
-						},
+						_elm_lang$html$Html$tr,
+						{ctor: '[]'},
 						{
 							ctor: '::',
 							_0: A2(
-								_elm_lang$html$Html$thead,
+								_elm_lang$html$Html$th,
 								{ctor: '[]'},
 								{
 									ctor: '::',
+									_0: _elm_lang$html$Html$text('name'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$th,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('pos x'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
 									_0: A2(
-										_elm_lang$html$Html$tr,
+										_elm_lang$html$Html$th,
 										{ctor: '[]'},
 										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('pos y'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$th,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('resource A'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
 											ctor: '::',
 											_0: A2(
 												_elm_lang$html$Html$th,
 												{ctor: '[]'},
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html$text('name'),
+													_0: _elm_lang$html$Html$text('resource B'),
 													_1: {ctor: '[]'}
 												}),
 											_1: {
@@ -9236,7 +9213,7 @@ var _user$project$Main$view = function (model) {
 													{ctor: '[]'},
 													{
 														ctor: '::',
-														_0: _elm_lang$html$Html$text('pos x'),
+														_0: _elm_lang$html$Html$text('resource C'),
 														_1: {ctor: '[]'}
 													}),
 												_1: {
@@ -9246,77 +9223,81 @@ var _user$project$Main$view = function (model) {
 														{ctor: '[]'},
 														{
 															ctor: '::',
-															_0: _elm_lang$html$Html$text('pos y'),
+															_0: _elm_lang$html$Html$text('available steps'),
 															_1: {ctor: '[]'}
 														}),
-													_1: {
-														ctor: '::',
-														_0: A2(
-															_elm_lang$html$Html$th,
-															{ctor: '[]'},
-															{
-																ctor: '::',
-																_0: _elm_lang$html$Html$text('resource A'),
-																_1: {ctor: '[]'}
-															}),
-														_1: {
-															ctor: '::',
-															_0: A2(
-																_elm_lang$html$Html$th,
-																{ctor: '[]'},
-																{
-																	ctor: '::',
-																	_0: _elm_lang$html$Html$text('resource B'),
-																	_1: {ctor: '[]'}
-																}),
-															_1: {
-																ctor: '::',
-																_0: A2(
-																	_elm_lang$html$Html$th,
-																	{ctor: '[]'},
-																	{
-																		ctor: '::',
-																		_0: _elm_lang$html$Html$text('resource C'),
-																		_1: {ctor: '[]'}
-																	}),
-																_1: {
-																	ctor: '::',
-																	_0: A2(
-																		_elm_lang$html$Html$th,
-																		{ctor: '[]'},
-																		{
-																			ctor: '::',
-																			_0: _elm_lang$html$Html$text('available steps'),
-																			_1: {ctor: '[]'}
-																		}),
-																	_1: {ctor: '[]'}
-																}
-															}
-														}
-													}
+													_1: {ctor: '[]'}
 												}
 											}
-										}),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
+										}
+									}
+								}
+							}
+						}),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$tbody,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$tr,
+							{ctor: '[]'},
+							{
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$tbody,
+									_elm_lang$html$Html$td,
 									{ctor: '[]'},
 									{
 										ctor: '::',
+										_0: _elm_lang$html$Html$text(model.name),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$td,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text(
+												_elm_lang$core$Basics$toString(model.pos_x)),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
 										_0: A2(
-											_elm_lang$html$Html$tr,
+											_elm_lang$html$Html$td,
 											{ctor: '[]'},
 											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text(
+													_elm_lang$core$Basics$toString(model.pos_y)),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$td,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text(
+														_elm_lang$core$Basics$toString(model.resource_a)),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
 												ctor: '::',
 												_0: A2(
 													_elm_lang$html$Html$td,
 													{ctor: '[]'},
 													{
 														ctor: '::',
-														_0: _elm_lang$html$Html$text(model.name),
+														_0: _elm_lang$html$Html$text(
+															_elm_lang$core$Basics$toString(model.resource_b)),
 														_1: {ctor: '[]'}
 													}),
 												_1: {
@@ -9327,7 +9308,7 @@ var _user$project$Main$view = function (model) {
 														{
 															ctor: '::',
 															_0: _elm_lang$html$Html$text(
-																_elm_lang$core$Basics$toString(model.pos_x)),
+																_elm_lang$core$Basics$toString(model.resource_c)),
 															_1: {ctor: '[]'}
 														}),
 													_1: {
@@ -9338,60 +9319,120 @@ var _user$project$Main$view = function (model) {
 															{
 																ctor: '::',
 																_0: _elm_lang$html$Html$text(
-																	_elm_lang$core$Basics$toString(model.pos_y)),
+																	_elm_lang$core$Basics$toString(model.available_steps)),
 																_1: {ctor: '[]'}
 															}),
-														_1: {
-															ctor: '::',
-															_0: A2(
-																_elm_lang$html$Html$td,
-																{ctor: '[]'},
-																{
-																	ctor: '::',
-																	_0: _elm_lang$html$Html$text(
-																		_elm_lang$core$Basics$toString(model.resource_a)),
-																	_1: {ctor: '[]'}
-																}),
-															_1: {
-																ctor: '::',
-																_0: A2(
-																	_elm_lang$html$Html$td,
-																	{ctor: '[]'},
-																	{
-																		ctor: '::',
-																		_0: _elm_lang$html$Html$text(
-																			_elm_lang$core$Basics$toString(model.resource_b)),
-																		_1: {ctor: '[]'}
-																	}),
-																_1: {
-																	ctor: '::',
-																	_0: A2(
-																		_elm_lang$html$Html$td,
-																		{ctor: '[]'},
-																		{
-																			ctor: '::',
-																			_0: _elm_lang$html$Html$text(
-																				_elm_lang$core$Basics$toString(model.resource_c)),
-																			_1: {ctor: '[]'}
-																		}),
-																	_1: {
-																		ctor: '::',
-																		_0: A2(
-																			_elm_lang$html$Html$td,
-																			{ctor: '[]'},
-																			{
-																				ctor: '::',
-																				_0: _elm_lang$html$Html$text(
-																					_elm_lang$core$Basics$toString(model.available_steps)),
-																				_1: {ctor: '[]'}
-																			}),
-																		_1: {ctor: '[]'}
-																	}
-																}
-															}
-														}
+														_1: {ctor: '[]'}
 													}
 												}
+											}
+										}
+									}
+								}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _user$project$Main$nav_bar = A2(
+	_elm_lang$html$Html$nav,
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('navbar navbar-inverse'),
+		_1: {ctor: '[]'}
+	},
+	{
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('container-fluid'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('navbar-header'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$a,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('navbar-brand'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$href('/home'),
+									_1: {ctor: '[]'}
+								}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Browser Game'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$ul,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('nav navbar-nav'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$li,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('active'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$a,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$href('/home'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('Home'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$li,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$a,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$href('/world'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('World'),
+												_1: {ctor: '[]'}
 											}),
 										_1: {ctor: '[]'}
 									}),
@@ -9401,22 +9442,121 @@ var _user$project$Main$view = function (model) {
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$button,
+							_elm_lang$html$Html$ul,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$BtnClick),
+								_0: _elm_lang$html$Html_Attributes$class('nav navbar-nav navbar-right'),
 								_1: {ctor: '[]'}
 							},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('Load Data'),
+								_0: A2(
+									_elm_lang$html$Html$li,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$a,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$href('/unlogin'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$span,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('glyphicon glyphicon-log-out'),
+														_1: {ctor: '[]'}
+													},
+													{ctor: '[]'}),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html$text(' Unlogin'),
+													_1: {ctor: '[]'}
+												}
+											}),
+										_1: {ctor: '[]'}
+									}),
 								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
 					}
 				}
+			}),
+		_1: {ctor: '[]'}
+	});
+var _user$project$Main$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A3(
+				_elm_lang$html$Html$node,
+				'link',
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$rel('stylesheet'),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$href('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'),
+						_1: {ctor: '[]'}
+					}
+				},
+				{ctor: '[]'}),
+			_1: {
+				ctor: '::',
+				_0: _user$project$Main$nav_bar,
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('container'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$style(
+									{
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#EFFFEF'},
+										_1: {
+											ctor: '::',
+											_0: {ctor: '_Tuple2', _0: 'border-radius', _1: '6px'},
+											_1: {ctor: '[]'}
+										}
+									}),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _user$project$Main$info_table(model),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
 			}
 		});
+};
+var _user$project$Main$Model = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {name: a, pos_x: b, pos_y: c, resource_a: d, resource_b: e, resource_c: f, available_steps: g, error: h};
+	});
+var _user$project$Main$PlayerDataArrived = function (a) {
+	return {ctor: 'PlayerDataArrived', _0: a};
+};
+var _user$project$Main$load_player_data = A2(
+	_elm_lang$http$Http$send,
+	_user$project$Main$PlayerDataArrived,
+	_elm_lang$http$Http$getString('/get_data'));
+var _user$project$Main$init = {
+	ctor: '_Tuple2',
+	_0: A8(_user$project$Main$Model, '', 0, 0, 0, 0, 0, 0, ''),
+	_1: _user$project$Main$load_player_data
 };
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
