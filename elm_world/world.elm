@@ -165,14 +165,32 @@ world_map model =
 
 navigator: Model -> Html Msg
 navigator model =
-  div []
-  [ div [style [("float", "center"), ("margin", "8px")]]
-    [ button [class "btn btn-default", onClick (Move Up)] [img [src "/files/arrow_up.png"] []]
-    , button [class "btn btn-default", onClick (Move Down)] [img [src "/files/arrow_down.png"] []]
-    , button [class "btn btn-default", onClick (Move Left)] [img [src "/files/arrow_left.png"] []]
-    , button [class "btn btn-default", onClick (Move Right)] [img [src "/files/arrow_right.png"] []]
+  let
+    button_class = if model.position_data.available_steps>0 then "btn btn-default" else "btn btn-default disabled"
+  in
+    div []
+    [ div [style [("float", "center"), ("margin", "8px")]]
+      [ button [class button_class, onClick (Move Up)] [img [src "/files/arrow_up.png"] []]
+      , button [class button_class, onClick (Move Down)] [img [src "/files/arrow_down.png"] []]
+      , button [class button_class, onClick (Move Left)] [img [src "/files/arrow_left.png"] []]
+      , button [class button_class, onClick (Move Right)] [img [src "/files/arrow_right.png"] []]
+      ]
     ]
-  ]
+
+available_steps_indicator: Model -> Html Msg
+available_steps_indicator model =
+  let
+    text_class = 
+    if model.position_data.available_steps>10 then
+      "text-success"
+    else if model.position_data.available_steps>3 then
+      "text-warning"
+    else
+      "text-danger"
+  in
+    div [style [("margin-top", "8px")]]
+    [ strong [class text_class] ["Steps left: "++(toString model.position_data.available_steps) |> text]
+    ]
 
 error_message: Model -> Html Msg
 error_message model =
@@ -186,6 +204,47 @@ error_message model =
     , text " again."
     ]
 
+first_column: Model -> Html Msg
+first_column model =
+  div [class "col-md-4"]
+  [ world_map model
+  , available_steps_indicator model
+  , navigator model
+  ]
+
+current_tile_text: Model -> Html Msg
+current_tile_text model =
+  case model.position_data.world |> Array.get 10 of
+    Just 0 -> p [class "text-primary"] [text "You find yourself on an empty patch of land."]
+    Just 1 -> p [class "text-primary"] 
+      [ strong [] [text "Resource_A"]
+      , text (" seems to be abundant within these grounds ("++(toString model.position_data.abundance_at_xy)++"%).")]
+    Just 2 -> p [class "text-primary"] 
+      [ strong [] [text "Resource_B"]
+      , text (" seems to be abundant within these grounds ("++(toString model.position_data.abundance_at_xy)++"%).")]
+    Just 3 -> p [class "text-primary"] 
+      [ strong [] [text "Resource_C"]
+      , text (" seems to be abundant within these grounds ("++(toString model.position_data.abundance_at_xy)++"%).")]
+    _ -> text "You managed to find a bug. Congratulations :D"
+
+show_current_tile: Model -> Html Msg
+show_current_tile model =
+  case model.position_data.world |> Array.get 10 of
+    Nothing -> img [src "/files/empty32.png", style [("border", "solid")]] []
+    Just 0 -> img [src "/files/no_resource.png", style [("border", "solid")]] []
+    Just 1 -> img [src "/files/resource_a.png", style [("border", "solid")]] []
+    Just 2 -> img [src "/files/resource_b.png", style [("border", "solid")]] []
+    Just 3 -> img [src "/files/resource_c.png", style [("border", "solid")]] []
+    Just _ -> img [src "/files/empty32.png", style [("border", "solid")]] []
+
+second_column: Model -> Html Msg
+second_column model =
+  div [class "col-md-8"]
+  [ h4 [] [text ("Your coordenates are ("++(toString model.position_data.pos_x)++","++(toString model.position_data.pos_y)++")")]
+  , current_tile_text model
+  , show_current_tile model
+  ]
+
 --how it looks
 view: Model -> Html Msg
 view model =
@@ -193,23 +252,20 @@ view model =
   [ node "link" [ rel "stylesheet", href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"] []
   , nav_bar
   , div [class "container", style [("background-color", "#EFFFEF"), ("border-radius", "6px")]]
-    [ world_map model
-    , navigator model
-    , error_message model
+    [ div [class "row", style [("margin-top", "12px")]]
+      [ first_column model
+      , second_column model
+      ]
+    , div [class "row", style [("margin-top", "12px")]]
+      [ error_message model
+      ]
     ]
   ]
-
---load_world_data: Cmd Msg
---load_world_data = Http.send WorldDataArrived (Http.getString "/get_world")
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Move direction -> (model, send_move_request direction)
-    --MoveUp -> (model, Cmd.none)
-    --MoveDown -> (model, Cmd.none)
-    --MoveLeft -> (model, Cmd.none)
-    --MoveRight -> (model, Cmd.none)
     WorldDataArrived (Ok position_data) -> ({model | position_data=position_data}, Cmd.none)
     WorldDataArrived (Err err) -> case err of 
       Http.BadUrl s -> ({model | error="BadUrl: "++s}, Cmd.none)

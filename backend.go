@@ -338,6 +338,7 @@ func main() {
             return
         }
 
+        // A post message to this address means the player wants to move
         if r.Method=="POST"{
             direction:=r.FormValue("direction")
             if direction=="Up"{

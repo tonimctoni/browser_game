@@ -108,11 +108,13 @@ func (l *LoginMap) add_login(permissions uint16, login_name, password string) (u
         return 0, errors.New("Could not read random data (add_login)")
     }
 
+    // Get salted hash
     h := sha256.New()
     h.Write([]byte(password))
     h.Write(salt[:])
     salted_password_hash:=h.Sum(nil)
 
+    // Open file with login data
     f, err:=os.OpenFile(l.filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
     if err!=nil{
         // panic("Could not open file (add_login)")
@@ -121,12 +123,14 @@ func (l *LoginMap) add_login(permissions uint16, login_name, password string) (u
     defer f.Close()
 
     id:=uint64(len(l.login_map)+1)
+    // Write new login to file
     f.Write(uint64_to_bytes(id))
     f.Write(uint16_to_bytes(permissions))
     f.Write(string_to_24_bytes(login_name))
     f.Write(salt[:])
     f.Write(salted_password_hash)
 
+    // Add new login to login_map
     salted_password_hash_array:=[32]byte{}
     copy(salted_password_hash_array[:],salted_password_hash)
     l.login_map[login_name]=&LoginData{id, permissions, login_name, salt, salted_password_hash_array}

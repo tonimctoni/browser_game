@@ -68,6 +68,7 @@ func load_PlayerMap(filename string) PlayerMap{
         player_map[player_data.Id]=player_data
     }
 
+    // A nice way to solve concurrent file access: only one thread does the accessing
     add_player_file_chan:=make(chan func(*os.File, int64), 20)
     modify_player_file_chan:=make(chan func(*os.File), 20)
     go func(){
@@ -110,6 +111,7 @@ func (p *PlayerMap) get_player_data(id uint64) (*PlayerData, bool){
 
     return player_data, ok
 }
+
 
 func save_pos_x(f*os.File, player_data *PlayerData){
     pos_x:=int64_to_bytes(player_data.Pos_x)
@@ -264,7 +266,7 @@ func (p *PlayerMap) add_player(id uint64, name string, pos_x, pos_y, resource_a,
     // Add new player to player_map
     p.player_map[id]=new_player_data
 
-    // Save new player to file
+    // Save new player to file (or rather, put the *saving* in a queue)
     p.add_player_file_chan<-func(f *os.File, file_pos int64){
         new_player_data.file_pos=file_pos
         f.Write(uint64_to_bytes(id))
