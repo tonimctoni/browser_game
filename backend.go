@@ -14,7 +14,7 @@ import "errors"
 import "strconv"
 // import "sync"
 import "crypto/rand"
-// import "os"
+import "os"
 
 const(
     login_lifetime time.Duration = 2*time.Hour
@@ -27,18 +27,21 @@ const(
     home_file = "elm_home/index.html"
     world_file = "elm_world/index.html"
     add_player_file = "files/add_player.html"
+    modify_self_file = "files/modify_self.html"
     login_address = "/login"
     unlogin_address = "/unlogin"
     get_name_address = "/get_name"
     get_data_address = "/get_data"
     get_world_address = "/get_world"
     add_player_address = "/add_player"
+    modify_self_address = "/modify_self"
     root_address = "/"
     home_address = "/home"
     world_address = "/world"
     cookie_name = "login_token"
 
     add_player_permission_flag = 0x0001
+    modify_self_permission_flag = 0x0002
 
     // time_slot_size = 12*time.Hour
     steps_per_time_slot = 20
@@ -83,11 +86,6 @@ func main() {
     check_data_integrity(login_map, player_map)
     login_state_map:=new_LoginStateMap()
     world:=new_World()
-
-
-    // jc_id:=login_map.add_login(0, "JC", "denton")
-    // fmt.Println(jc_id)
-    // player_map.add_player(jc_id, "JC again", -5, -6, 1000, 500, 250)
 
     // Threadsafe rng
     rng:=make(chan int64)
@@ -439,6 +437,85 @@ func main() {
                 return
             }
             w.Write([]byte("Player added"))
+            return
+        } else {
+            http.Error(w, "Request must ge GET or POST.", http.StatusBadRequest)
+            return
+        }
+    })
+
+    mux.HandleFunc(modify_self_address, func (w http.ResponseWriter, r *http.Request){
+        player_data,permissions,err:=get_player_data_and_permissions(r)
+        if(err!=nil){
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+
+        if (permissions&modify_self_permission_flag)==0{
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+
+        if r.Method=="GET"{
+            http.ServeFile(w, r, modify_self_file)
+            return
+        } else if r.Method=="POST" {
+            pos_x:=r.FormValue("pos_x")
+            if pos_x!=""{
+                player_data.Pos_x,_=strconv.ParseInt(pos_x,10,64)
+            }
+
+            pos_y:=r.FormValue("pos_y")
+            if pos_y!=""{
+                player_data.Pos_y,_=strconv.ParseInt(pos_y,10,64)
+            }
+
+            resource_a:=r.FormValue("resource_a")
+            if resource_a!=""{
+                player_data.Resource_A,_=strconv.ParseInt(resource_a,10,64)
+            }
+
+            resource_b:=r.FormValue("resource_b")
+            if resource_b!=""{
+                player_data.Resource_B,_=strconv.ParseInt(resource_b,10,64)
+            }
+
+            resource_c:=r.FormValue("resource_c")
+            if resource_c!=""{
+                player_data.Resource_C,_=strconv.ParseInt(resource_c,10,64)
+            }
+
+            available_steps:=r.FormValue("available_steps")
+            if available_steps!=""{
+                player_data.Available_steps,_=strconv.ParseInt(available_steps,10,64)
+            }
+
+            player_map.modify_player_file_chan<-func(f *os.File){
+                if pos_x!=""{
+                    save_pos_x(f, player_data)
+                }
+                if pos_y!=""{
+                    save_pos_y(f, player_data)
+                }
+
+                if resource_a!=""{
+                    save_resource_a(f, player_data)
+                }
+
+                if resource_b!=""{
+                    save_resource_b(f, player_data)
+                }
+
+                if resource_c!=""{
+                    save_resource_c(f, player_data)
+                }
+
+                if available_steps!=""{
+                    save_available_steps(f, player_data)
+                }
+            }
+
+            w.Write([]byte("Self modified"))
             return
         } else {
             http.Error(w, "Request must ge GET or POST.", http.StatusBadRequest)

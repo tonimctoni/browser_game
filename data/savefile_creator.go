@@ -193,7 +193,7 @@ func add_entry(entry Entry) {
 
 
 func main() {
-    add_entry(Entry{1, 1, "toni", "password", "the toniman", 0, 0, 100, 150, 25, 20, 0})
+    add_entry(Entry{1, 3, "toni", "password", "the toniman", 0, 0, 100, 150, 25, 20, 0})
     add_entry(Entry{2, 0, "sabrina", "password", "sorceress_of_binaheim", 2, -2, 120, 75, 50, 18, 0})
 }
 

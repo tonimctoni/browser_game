@@ -9130,6 +9130,61 @@ var _user$project$Main$update = F2(
 				}
 		}
 	});
+var _user$project$Main$error_message = function (model) {
+	return _elm_lang$core$Native_Utils.eq(model.error, '') ? A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{ctor: '[]'}) : A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('alert alert-warning'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$strong,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'Warning! (',
+							A2(_elm_lang$core$Basics_ops['++'], model.error, ')'))),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(' Data could not be read, please consider'),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$a,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$href('/login'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('alert-link'),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(' logging in'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(' again.'),
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		});
+};
 var _user$project$Main$nav_bar = A2(
 	_elm_lang$html$Html$nav,
 	{
@@ -9857,7 +9912,11 @@ var _user$project$Main$view = function (model) {
 							_1: {
 								ctor: '::',
 								_0: _user$project$Main$navigator(model),
-								_1: {ctor: '[]'}
+								_1: {
+									ctor: '::',
+									_0: _user$project$Main$error_message(model),
+									_1: {ctor: '[]'}
+								}
 							}
 						}),
 					_1: {ctor: '[]'}

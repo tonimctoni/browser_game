@@ -68,8 +68,8 @@ func load_PlayerMap(filename string) PlayerMap{
         player_map[player_data.Id]=player_data
     }
 
-    add_player_file_chan:=make(chan func(*os.File, int64))
-    modify_player_file_chan:=make(chan func(*os.File))
+    add_player_file_chan:=make(chan func(*os.File, int64), 20)
+    modify_player_file_chan:=make(chan func(*os.File), 20)
     go func(){
         select{
         case add_player_func:=<-add_player_file_chan:
@@ -251,25 +251,6 @@ func (p *PlayerMap) add_player(id uint64, name string, pos_x, pos_y, resource_a,
     last_time_gotten_steps:=int64(0)
     new_player_data:=&PlayerData{-1000, &sync.Mutex{}, id, name, pos_x, pos_y, resource_a, resource_b, resource_c, available_steps, last_time_gotten_steps}
 
-    // // Add new player to player_map
-    // err:=func() error{
-    //     p.player_add_lock.Lock()
-    //     defer p.player_add_lock.Unlock()
-
-    //     // Check whether id already exists in map
-    //     _,ok:=p.player_map[id]
-    //     if ok{
-    //         return errors.New("Id already exists (add_player)")
-    //     }
-
-    //     p.player_map[id]=new_player_data
-    //     return nil
-    // }()
-    // if err!=nil{
-    //     return err
-    // }
-
-    
     p.player_add_lock.Lock()
     defer p.player_add_lock.Unlock()
 

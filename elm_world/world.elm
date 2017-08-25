@@ -112,6 +112,18 @@ navigator model =
     ]
   ]
 
+error_message: Model -> Html Msg
+error_message model =
+  if model.error=="" then
+    div [] []
+  else
+    div [class "alert alert-warning"] 
+    [ strong [] [text ("Warning! ("++model.error++")")]
+    , text " Data could not be read, please consider"
+    , a [href "/login", class "alert-link"] [text " logging in"]
+    , text " again."
+    ]
+
 --how it looks
 view: Model -> Html Msg
 view model =
@@ -121,9 +133,9 @@ view model =
   , div [class "container", style [("background-color", "#EFFFEF"), ("border-radius", "6px")]]
     [ world_map model
     , navigator model
+    , error_message model
     ]
   ]
-
 
 --load_world_data: Cmd Msg
 --load_world_data = Http.send WorldDataArrived (Http.getString "/get_world")
