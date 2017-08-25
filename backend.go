@@ -72,12 +72,11 @@ func (h *HandlerForFile) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     w.Write(h.content)
 }
 
-// TODO: add "add player" functionality
-// TODO: add counter to next time slot in home page
+// TODO: log successful writes to savefiles
+// TODO: under permissions also add infinite all (steps,resources,etc are not spent), transform data page (to set steps,resource,position,etc)
+// TODO: add "check time, add steps if needed" function somewhere
+// TODO: add counter to next time slot in home page and world page
 // TODO: Log all errors in error log file
-// TODO: Thread safety for all maps
-//      actually, only maps that are modified on runtime
-//      for player data: use locks only when writing, or read-write stuff. Dont use locks for only reads
 func main() {
     login_map:=load_LoginMap(login_data_file)
     player_map:=load_PlayerMap(player_data_file)
@@ -339,6 +338,12 @@ func main() {
         if(err!=nil){
             http.NotFound(w,r)
             return
+        }
+
+        if r.Method=="POST"{
+            r.ParseForm()
+            log.Println(r.PostForm)
+            // http.ServeFile(w, r, add_player_file)
         }
 
         var to_send struct{

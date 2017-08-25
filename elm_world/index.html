@@ -8526,6 +8526,120 @@ var _elm_lang$html$Html_Attributes$classList = function (list) {
 				A2(_elm_lang$core$List$filter, _elm_lang$core$Tuple$second, list))));
 };
 var _elm_lang$html$Html_Attributes$style = _elm_lang$virtual_dom$VirtualDom$style;
+var _elm_lang$html$Html_Events$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
+var _elm_lang$html$Html_Events$targetChecked = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'checked',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$bool);
+var _elm_lang$html$Html_Events$targetValue = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'value',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$string);
+var _elm_lang$html$Html_Events$defaultOptions = _elm_lang$virtual_dom$VirtualDom$defaultOptions;
+var _elm_lang$html$Html_Events$onWithOptions = _elm_lang$virtual_dom$VirtualDom$onWithOptions;
+var _elm_lang$html$Html_Events$on = _elm_lang$virtual_dom$VirtualDom$on;
+var _elm_lang$html$Html_Events$onFocus = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'focus',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onBlur = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'blur',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onSubmitOptions = _elm_lang$core$Native_Utils.update(
+	_elm_lang$html$Html_Events$defaultOptions,
+	{preventDefault: true});
+var _elm_lang$html$Html_Events$onSubmit = function (msg) {
+	return A3(
+		_elm_lang$html$Html_Events$onWithOptions,
+		'submit',
+		_elm_lang$html$Html_Events$onSubmitOptions,
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onCheck = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'change',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetChecked));
+};
+var _elm_lang$html$Html_Events$onInput = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'input',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetValue));
+};
+var _elm_lang$html$Html_Events$onMouseOut = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseout',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseOver = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseover',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseLeave = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseleave',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseEnter = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseenter',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseUp = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseup',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseDown = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mousedown',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onDoubleClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'dblclick',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'click',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$Options = F2(
+	function (a, b) {
+		return {stopPropagation: a, preventDefault: b};
+	});
 var _elm_lang$http$Native_Http = function() {
 
 
@@ -8890,108 +9004,130 @@ var _user$project$Main$subscriptions = function (model) {
 var _user$project$Main$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
-		if (_p0._0.ctor === 'Ok') {
-			var _p5 = _p0._0._0;
-			var abundance_at_xy = function () {
-				var _p1 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Abundance_at_xy', _elm_lang$core$Json_Decode$int),
-					_p5);
-				if (_p1.ctor === 'Ok') {
-					return _p1._0;
+		switch (_p0.ctor) {
+			case 'MoveUp':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'MoveDown':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'MoveLeft':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'MoveRight':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			default:
+				if (_p0._0.ctor === 'Ok') {
+					var _p6 = _p0._0._0;
+					var available_steps = function () {
+						var _p1 = A2(
+							_elm_lang$core$Json_Decode$decodeString,
+							A2(_elm_lang$core$Json_Decode$field, 'Available_steps', _elm_lang$core$Json_Decode$int),
+							_p6);
+						if (_p1.ctor === 'Ok') {
+							return _p1._0;
+						} else {
+							return -1;
+						}
+					}();
+					var abundance_at_xy = function () {
+						var _p2 = A2(
+							_elm_lang$core$Json_Decode$decodeString,
+							A2(_elm_lang$core$Json_Decode$field, 'Abundance_at_xy', _elm_lang$core$Json_Decode$int),
+							_p6);
+						if (_p2.ctor === 'Ok') {
+							return _p2._0;
+						} else {
+							return -1;
+						}
+					}();
+					var world = function () {
+						var _p3 = A2(
+							_elm_lang$core$Json_Decode$decodeString,
+							A2(
+								_elm_lang$core$Json_Decode$field,
+								'World_array',
+								_elm_lang$core$Json_Decode$array(_elm_lang$core$Json_Decode$int)),
+							_p6);
+						if (_p3.ctor === 'Ok') {
+							return _p3._0;
+						} else {
+							return _elm_lang$core$Array$empty;
+						}
+					}();
+					var pos_y = function () {
+						var _p4 = A2(
+							_elm_lang$core$Json_Decode$decodeString,
+							A2(_elm_lang$core$Json_Decode$field, 'Pos_y', _elm_lang$core$Json_Decode$int),
+							_p6);
+						if (_p4.ctor === 'Ok') {
+							return _p4._0;
+						} else {
+							return -1;
+						}
+					}();
+					var pos_x = function () {
+						var _p5 = A2(
+							_elm_lang$core$Json_Decode$decodeString,
+							A2(_elm_lang$core$Json_Decode$field, 'Pos_x', _elm_lang$core$Json_Decode$int),
+							_p6);
+						if (_p5.ctor === 'Ok') {
+							return _p5._0;
+						} else {
+							return -1;
+						}
+					}();
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{pos_x: pos_x, pos_y: pos_y, world: world, abundance_at_xy: abundance_at_xy, available_steps: available_steps}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
 				} else {
-					return -1;
+					var _p7 = _p0._0._0;
+					switch (_p7.ctor) {
+						case 'BadUrl':
+							return {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Native_Utils.update(
+									model,
+									{
+										error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p7._0)
+									}),
+								_1: _elm_lang$core$Platform_Cmd$none
+							};
+						case 'Timeout':
+							return {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Native_Utils.update(
+									model,
+									{error: 'Timeout'}),
+								_1: _elm_lang$core$Platform_Cmd$none
+							};
+						case 'NetworkError':
+							return {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Native_Utils.update(
+									model,
+									{error: 'NetworkError'}),
+								_1: _elm_lang$core$Platform_Cmd$none
+							};
+						case 'BadStatus':
+							return {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Native_Utils.update(
+									model,
+									{error: 'BadStatus'}),
+								_1: _elm_lang$core$Platform_Cmd$none
+							};
+						default:
+							return {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Native_Utils.update(
+									model,
+									{error: 'BadPayload'}),
+								_1: _elm_lang$core$Platform_Cmd$none
+							};
+					}
 				}
-			}();
-			var world = function () {
-				var _p2 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(
-						_elm_lang$core$Json_Decode$field,
-						'World_array',
-						_elm_lang$core$Json_Decode$array(_elm_lang$core$Json_Decode$int)),
-					_p5);
-				if (_p2.ctor === 'Ok') {
-					return _p2._0;
-				} else {
-					return _elm_lang$core$Array$empty;
-				}
-			}();
-			var pos_y = function () {
-				var _p3 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Pos_y', _elm_lang$core$Json_Decode$int),
-					_p5);
-				if (_p3.ctor === 'Ok') {
-					return _p3._0;
-				} else {
-					return -1;
-				}
-			}();
-			var pos_x = function () {
-				var _p4 = A2(
-					_elm_lang$core$Json_Decode$decodeString,
-					A2(_elm_lang$core$Json_Decode$field, 'Pos_x', _elm_lang$core$Json_Decode$int),
-					_p5);
-				if (_p4.ctor === 'Ok') {
-					return _p4._0;
-				} else {
-					return -1;
-				}
-			}();
-			return {
-				ctor: '_Tuple2',
-				_0: _elm_lang$core$Native_Utils.update(
-					model,
-					{pos_x: pos_x, pos_y: pos_y, world: world, abundance_at_xy: abundance_at_xy}),
-				_1: _elm_lang$core$Platform_Cmd$none
-			};
-		} else {
-			var _p6 = _p0._0._0;
-			switch (_p6.ctor) {
-				case 'BadUrl':
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p6._0)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				case 'Timeout':
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{error: 'Timeout'}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				case 'NetworkError':
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{error: 'NetworkError'}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				case 'BadStatus':
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{error: 'BadStatus'}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				default:
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{error: 'BadPayload'}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-			}
 		}
 	});
 var _user$project$Main$nav_bar = A2(
@@ -9146,9 +9282,9 @@ var _user$project$Main$nav_bar = A2(
 			}),
 		_1: {ctor: '[]'}
 	});
-var _user$project$Main$Model = F5(
-	function (a, b, c, d, e) {
-		return {pos_x: a, pos_y: b, world: c, abundance_at_xy: d, error: e};
+var _user$project$Main$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {pos_x: a, pos_y: b, world: c, abundance_at_xy: d, available_steps: e, error: f};
 	});
 var _user$project$Main$WorldDataArrived = function (a) {
 	return {ctor: 'WorldDataArrived', _0: a};
@@ -9159,8 +9295,142 @@ var _user$project$Main$load_world_data = A2(
 	_elm_lang$http$Http$getString('/get_world'));
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
-	_0: A5(_user$project$Main$Model, 0, 0, _elm_lang$core$Array$empty, 0, ''),
+	_0: A6(_user$project$Main$Model, 0, 0, _elm_lang$core$Array$empty, 0, 0, ''),
 	_1: _user$project$Main$load_world_data
+};
+var _user$project$Main$MoveRight = {ctor: 'MoveRight'};
+var _user$project$Main$MoveLeft = {ctor: 'MoveLeft'};
+var _user$project$Main$MoveDown = {ctor: 'MoveDown'};
+var _user$project$Main$MoveUp = {ctor: 'MoveUp'};
+var _user$project$Main$navigator = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$style(
+						{
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'float', _1: 'center'},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'margin', _1: '8px'},
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$button,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$MoveUp),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$img,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$src('/files/arrow_up.png'),
+									_1: {ctor: '[]'}
+								},
+								{ctor: '[]'}),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$button,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$MoveDown),
+									_1: {ctor: '[]'}
+								}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$img,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$src('/files/arrow_down.png'),
+										_1: {ctor: '[]'}
+									},
+									{ctor: '[]'}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$button,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$MoveLeft),
+										_1: {ctor: '[]'}
+									}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$img,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$src('/files/arrow_left.png'),
+											_1: {ctor: '[]'}
+										},
+										{ctor: '[]'}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$button,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$MoveRight),
+											_1: {ctor: '[]'}
+										}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$img,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$src('/files/arrow_right.png'),
+												_1: {ctor: '[]'}
+											},
+											{ctor: '[]'}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}),
+			_1: {ctor: '[]'}
+		});
 };
 var _user$project$Main$CurrentBorder = {ctor: 'CurrentBorder'};
 var _user$project$Main$NormalBorder = {ctor: 'NormalBorder'};
@@ -9170,7 +9440,7 @@ var _user$project$Main$get_tile = F2(
 		var the_style = _elm_lang$core$Native_Utils.eq(border_style, _user$project$Main$NoBorder) ? _elm_lang$html$Html_Attributes$style(
 			{
 				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'margin', _1: '4px'},
+				_0: {ctor: '_Tuple2', _0: 'margin', _1: '6px'},
 				_1: {ctor: '[]'}
 			}) : (_elm_lang$core$Native_Utils.eq(border_style, _user$project$Main$NormalBorder) ? _elm_lang$html$Html_Attributes$style(
 			{
@@ -9181,7 +9451,7 @@ var _user$project$Main$get_tile = F2(
 					_0: {ctor: '_Tuple2', _0: 'border-style', _1: 'solid'},
 					_1: {
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'border-width', _1: '2px'},
+						_0: {ctor: '_Tuple2', _0: 'border-width', _1: '4px'},
 						_1: {ctor: '[]'}
 					}
 				}
@@ -9194,7 +9464,7 @@ var _user$project$Main$get_tile = F2(
 					_0: {ctor: '_Tuple2', _0: 'border-style', _1: 'solid'},
 					_1: {
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'border-width', _1: '2px'},
+						_0: {ctor: '_Tuple2', _0: 'border-width', _1: '4px'},
 						_1: {
 							ctor: '::',
 							_0: {ctor: '_Tuple2', _0: 'border-color', _1: 'blue'},
@@ -9204,13 +9474,13 @@ var _user$project$Main$get_tile = F2(
 				}
 			}) : _elm_lang$html$Html_Attributes$style(
 			{ctor: '[]'})));
-		var _p7 = mi;
-		if (_p7.ctor === 'Nothing') {
+		var _p8 = mi;
+		if (_p8.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$img,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$src('/files/empty.png'),
+					_0: _elm_lang$html$Html_Attributes$src('/files/empty32.png'),
 					_1: {
 						ctor: '::',
 						_0: the_style,
@@ -9219,7 +9489,7 @@ var _user$project$Main$get_tile = F2(
 				},
 				{ctor: '[]'});
 		} else {
-			switch (_p7._0) {
+			switch (_p8._0) {
 				case 0:
 					return A2(
 						_elm_lang$html$Html$img,
@@ -9277,7 +9547,7 @@ var _user$project$Main$get_tile = F2(
 						_elm_lang$html$Html$img,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$src('/files/empty.png'),
+							_0: _elm_lang$html$Html_Attributes$src('/files/empty32.png'),
 							_1: {
 								ctor: '::',
 								_0: the_style,
@@ -9584,7 +9854,11 @@ var _user$project$Main$view = function (model) {
 						{
 							ctor: '::',
 							_0: _user$project$Main$world_map(model),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: _user$project$Main$navigator(model),
+								_1: {ctor: '[]'}
+							}
 						}),
 					_1: {ctor: '[]'}
 				}

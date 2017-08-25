@@ -34,13 +34,14 @@ type PlayerData struct{
 
 type PlayerMap struct{
     player_map map[uint64]*PlayerData // (user_id -> his ingame player data)
-    player_add_and_file_lock *sync.RWMutex
-    filename string
+    player_add_lock *sync.RWMutex
+    add_player_file_chan chan func(*os.File, int64)
+    modify_player_file_chan chan func(*os.File)
 }
 
 // This handles the reading of user player data from disk
-func load_PlayerMap(filenme string) PlayerMap{
-    f, err:=os.Open(filenme)
+func load_PlayerMap(filename string) PlayerMap{
+    f, err:=os.Open(filename)
     if err!=nil{
         panic("Could not open login file")
     }
@@ -67,28 +68,45 @@ func load_PlayerMap(filenme string) PlayerMap{
         player_map[player_data.Id]=player_data
     }
 
-    return PlayerMap{player_map, &sync.RWMutex{}, filenme}
+    add_player_file_chan:=make(chan func(*os.File, int64))
+    modify_player_file_chan:=make(chan func(*os.File))
+    go func(){
+        select{
+        case add_player_func:=<-add_player_file_chan:
+            f, err:=os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+            if err!=nil{
+                panic("Could not open file (add_player_file_chan)")
+            }
+
+            // Get stats of the opened file. Most importantly its size
+            file_stat, err:=f.Stat()
+            if err!=nil{
+                panic("Could not get file stats (add_player_file_chan)")
+            }
+
+            add_player_func(f, file_stat.Size())
+            f.Close()
+
+        case modify_player_func:=<-modify_player_file_chan:
+            f, err:=os.OpenFile(filename, os.O_WRONLY, 0644)
+            if err!=nil{
+                panic("Could not open file (modify_player_file_chan)")
+            }
+
+            modify_player_func(f)
+            f.Close()
+        }
+    }()
+
+    return PlayerMap{player_map, &sync.RWMutex{}, add_player_file_chan, modify_player_file_chan}
 }
 
 func (p *PlayerMap) get_player_data(id uint64) (*PlayerData, bool){
-    p.player_add_and_file_lock.RLock()
+    p.player_add_lock.RLock()
     player_data, ok:=p.player_map[id]
-    p.player_add_and_file_lock.RUnlock()
+    p.player_add_lock.RUnlock()
 
     return player_data, ok
-}
-
-func (p *PlayerMap) open_file_and_do(do func(*os.File) error) error{
-    p.player_add_and_file_lock.Lock()
-    defer p.player_add_and_file_lock.Unlock()
-
-    f, err:=os.OpenFile(p.filename, os.O_WRONLY, 0644)
-    if err!=nil{
-        panic("Could not open file (save_player_data)")
-    }
-    defer f.Close()
-
-    return do(f)
 }
 
 func save_pos_x(f*os.File, player_data *PlayerData){
@@ -148,75 +166,79 @@ func save_last_time_gotten_steps(f*os.File, player_data *PlayerData){
 }
 
 func (p *PlayerMap) move_up(player_data *PlayerData) error{
+    player_data.read_and_modify_lock.Lock()
+    defer player_data.read_and_modify_lock.Unlock()
+
     if player_data.Available_steps<1{
         return errors.New("No available steps left")
     }
 
-    return p.open_file_and_do(func(f *os.File) error{
-            if player_data.Available_steps<1{
-                return errors.New("No available steps left")
-            }
+    player_data.Pos_y+=1
+    player_data.Available_steps-=1
 
-            player_data.Pos_y+=1
-            player_data.Available_steps-=1
-            save_pos_y(f, player_data)
-            save_available_steps(f, player_data)
-            return nil
-        })
+    p.modify_player_file_chan<-func(f *os.File){
+        save_pos_y(f, player_data)
+        save_available_steps(f, player_data)
+    }
+
+    return nil
 }
 
 func (p *PlayerMap) move_down(player_data *PlayerData) error{
+    player_data.read_and_modify_lock.Lock()
+    defer player_data.read_and_modify_lock.Unlock()
+
     if player_data.Available_steps<1{
         return errors.New("No available steps left")
     }
 
-    return p.open_file_and_do(func(f *os.File) error{
-            if player_data.Available_steps<1{
-                return errors.New("No available steps left")
-            }
+    player_data.Pos_y-=1
+    player_data.Available_steps-=1
 
-            player_data.Pos_y-=1
-            player_data.Available_steps-=1
-            save_pos_y(f, player_data)
-            save_available_steps(f, player_data)
-            return nil
-        })
+    p.modify_player_file_chan<-func(f *os.File){
+        save_pos_y(f, player_data)
+        save_available_steps(f, player_data)
+    }
+
+    return nil
 }
 
 func (p *PlayerMap) move_left(player_data *PlayerData) error{
+    player_data.read_and_modify_lock.Lock()
+    defer player_data.read_and_modify_lock.Unlock()
+
     if player_data.Available_steps<1{
         return errors.New("No available steps left")
     }
 
-    return p.open_file_and_do(func(f *os.File) error{
-            if player_data.Available_steps<1{
-                return errors.New("No available steps left")
-            }
+    player_data.Pos_x-=1
+    player_data.Available_steps-=1
 
-            player_data.Pos_x-=1
-            player_data.Available_steps-=1
-            save_pos_x(f, player_data)
-            save_available_steps(f, player_data)
-            return nil
-        })
+    p.modify_player_file_chan<-func(f *os.File){
+        save_pos_x(f, player_data)
+        save_available_steps(f, player_data)
+    }
+
+    return nil
 }
 
 func (p *PlayerMap) move_right(player_data *PlayerData) error{
+    player_data.read_and_modify_lock.Lock()
+    defer player_data.read_and_modify_lock.Unlock()
+
     if player_data.Available_steps<1{
         return errors.New("No available steps left")
     }
 
-    return p.open_file_and_do(func(f *os.File) error{
-            if player_data.Available_steps<1{
-                return errors.New("No available steps left")
-            }
+    player_data.Pos_x+=1
+    player_data.Available_steps-=1
 
-            player_data.Pos_x+=1
-            player_data.Available_steps-=1
-            save_pos_x(f, player_data)
-            save_available_steps(f, player_data)
-            return nil
-        })
+    p.modify_player_file_chan<-func(f *os.File){
+        save_pos_x(f, player_data)
+        save_available_steps(f, player_data)
+    }
+
+    return nil
 }
 
 func (p *PlayerMap) add_player(id uint64, name string, pos_x, pos_y, resource_a, resource_b, resource_c int64) error{
@@ -224,44 +246,54 @@ func (p *PlayerMap) add_player(id uint64, name string, pos_x, pos_y, resource_a,
         return errors.New("Name is too long (len(name)>24, add_player)")
     }
 
-    p.player_add_and_file_lock.Lock()
-    defer p.player_add_and_file_lock.Unlock()
+    // Create new player
+    available_steps:=int64(steps_per_time_slot)
+    last_time_gotten_steps:=int64(0)
+    new_player_data:=&PlayerData{-1000, &sync.Mutex{}, id, name, pos_x, pos_y, resource_a, resource_b, resource_c, available_steps, last_time_gotten_steps}
 
-    // Check whether id already exists in map
-    _,ok:=p.player_map[id]
+    // // Add new player to player_map
+    // err:=func() error{
+    //     p.player_add_lock.Lock()
+    //     defer p.player_add_lock.Unlock()
+
+    //     // Check whether id already exists in map
+    //     _,ok:=p.player_map[id]
+    //     if ok{
+    //         return errors.New("Id already exists (add_player)")
+    //     }
+
+    //     p.player_map[id]=new_player_data
+    //     return nil
+    // }()
+    // if err!=nil{
+    //     return err
+    // }
+
+    
+    p.player_add_lock.Lock()
+    defer p.player_add_lock.Unlock()
+
+    _,ok:=p.player_map[id] // Check whether id already exists in map
     if ok{
-        // panic("Id already exists (add_player)")
         return errors.New("Id already exists (add_player)")
     }
 
-    f, err:=os.OpenFile(p.filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-    if err!=nil{
-        // panic("Could not open file (add_player)")
-        return errors.New("Could not open file (add_player)")
+    // Add new player to player_map
+    p.player_map[id]=new_player_data
+
+    // Save new player to file
+    p.add_player_file_chan<-func(f *os.File, file_pos int64){
+        new_player_data.file_pos=file_pos
+        f.Write(uint64_to_bytes(id))
+        f.Write(string_to_24_bytes(name))
+        f.Write(int64_to_bytes(pos_x))
+        f.Write(int64_to_bytes(pos_y))
+        f.Write(int64_to_bytes(resource_a))
+        f.Write(int64_to_bytes(resource_b))
+        f.Write(int64_to_bytes(resource_c))
+        f.Write(int64_to_bytes(available_steps))
+        f.Write(int64_to_bytes(last_time_gotten_steps))
     }
-    defer f.Close()
 
-    // Get stats of the opened file. Most importantly its size
-    file_stat, err:=f.Stat()
-    if err!=nil{
-        // panic("Could not get file stats")
-        return errors.New("Could not get file stats")
-    }
-    file_pos:=file_stat.Size()
-
-    available_steps:=int64(steps_per_time_slot)
-    last_time_gotten_steps:=int64(0)
-
-    f.Write(uint64_to_bytes(id))
-    f.Write(string_to_24_bytes(name))
-    f.Write(int64_to_bytes(pos_x))
-    f.Write(int64_to_bytes(pos_y))
-    f.Write(int64_to_bytes(resource_a))
-    f.Write(int64_to_bytes(resource_b))
-    f.Write(int64_to_bytes(resource_c))
-    f.Write(int64_to_bytes(available_steps))
-    f.Write(int64_to_bytes(last_time_gotten_steps))
-
-    p.player_map[id]=&PlayerData{file_pos, &sync.Mutex{}, id, name, pos_x, pos_y, resource_a, resource_b, resource_c, available_steps, last_time_gotten_steps}
     return nil
 }

@@ -1,6 +1,6 @@
 import Html exposing (..)
 import Html.Attributes exposing (..)
---import Html.Events exposing (onClick)
+import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode
 import Array
@@ -11,6 +11,7 @@ type alias Model =
   , pos_y : Int
   , world : Array.Array Int
   , abundance_at_xy : Int
+  , available_steps : Int
   , error : String
   }
 
@@ -18,10 +19,10 @@ load_world_data: Cmd Msg
 load_world_data = Http.send WorldDataArrived (Http.getString "/get_world")
 
 init: (Model, Cmd Msg)
-init = (Model 0 0 Array.empty 0 "", load_world_data)
+init = (Model 0 0 Array.empty 0 0 "", load_world_data)
 
 --names of things that can happen
-type Msg = WorldDataArrived (Result Http.Error String)
+type Msg = MoveUp | MoveDown | MoveLeft | MoveRight | WorldDataArrived (Result Http.Error String)
 
 nav_bar: Html Msg
 nav_bar =
@@ -47,21 +48,21 @@ get_tile border_style mi=
   let
     the_style =
       if border_style==NoBorder then
-        style [("margin", "4px")]
+        style [("margin", "6px")]
       else if border_style==NormalBorder then
-        style [("margin", "2px"), ("border-style", "solid"), ("border-width", "2px")]
+        style [("margin", "2px"), ("border-style", "solid"), ("border-width", "4px")]
       else if border_style==CurrentBorder then
-        style [("margin", "2px"), ("border-style", "solid"), ("border-width", "2px"), ("border-color", "blue")]
+        style [("margin", "2px"), ("border-style", "solid"), ("border-width", "4px"), ("border-color", "blue")]
       else
         style []
   in
     case mi of
-      Nothing -> img [src "/files/empty.png", the_style] []
+      Nothing -> img [src "/files/empty32.png", the_style] []
       Just 0 -> img [src "/files/no_resource.png", the_style] []
       Just 1 -> img [src "/files/resource_a.png", the_style] []
       Just 2 -> img [src "/files/resource_b.png", the_style] []
       Just 3 -> img [src "/files/resource_c.png", the_style] []
-      Just _ -> img [src "/files/empty.png", the_style] []
+      Just _ -> img [src "/files/empty32.png", the_style] []
 
 world_map: Model -> Html Msg
 world_map model =
@@ -100,6 +101,17 @@ world_map model =
     ]
   ]
 
+navigator: Model -> Html Msg
+navigator model =
+  div []
+  [ div [style [("float", "center"), ("margin", "8px")]]
+    [ button [class "btn btn-default", onClick MoveUp] [img [src "/files/arrow_up.png"] []]
+    , button [class "btn btn-default", onClick MoveDown] [img [src "/files/arrow_down.png"] []]
+    , button [class "btn btn-default", onClick MoveLeft] [img [src "/files/arrow_left.png"] []]
+    , button [class "btn btn-default", onClick MoveRight] [img [src "/files/arrow_right.png"] []]
+    ]
+  ]
+
 --how it looks
 view: Model -> Html Msg
 view model =
@@ -108,29 +120,40 @@ view model =
   , nav_bar
   , div [class "container", style [("background-color", "#EFFFEF"), ("border-radius", "6px")]]
     [ world_map model
+    , navigator model
     ]
   ]
+
+
+--load_world_data: Cmd Msg
+--load_world_data = Http.send WorldDataArrived (Http.getString "/get_world")
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    --Nothing -> (model, Cmd.none)
+    MoveUp -> (model, Cmd.none)
+    MoveDown -> (model, Cmd.none)
+    MoveLeft -> (model, Cmd.none)
+    MoveRight -> (model, Cmd.none)
     WorldDataArrived (Ok json_string) -> 
       let
         pos_x = case Decode.decodeString (Decode.field "Pos_x" Decode.int) json_string of
-            Ok(x) -> x
-            Err(_) -> -1
+          Ok(x) -> x
+          Err(_) -> -1
         pos_y = case Decode.decodeString (Decode.field "Pos_y" Decode.int) json_string of
-            Ok(x) -> x
-            Err(_) -> -1
+          Ok(x) -> x
+          Err(_) -> -1
         world = case Decode.decodeString (Decode.field "World_array" (Decode.array Decode.int)) json_string of
-            Ok(x) -> x
-            Err(_) -> Array.empty
+          Ok(x) -> x
+          Err(_) -> Array.empty
         abundance_at_xy = case Decode.decodeString (Decode.field "Abundance_at_xy" Decode.int) json_string of
-            Ok(x) -> x
-            Err(_) -> -1
+          Ok(x) -> x
+          Err(_) -> -1
+        available_steps = case Decode.decodeString (Decode.field "Available_steps" Decode.int) json_string of
+          Ok(x) -> x
+          Err(_) -> -1
       in
-        ({model | pos_x=pos_x, pos_y=pos_y, world=world, abundance_at_xy=abundance_at_xy}, Cmd.none)
+        ({model | pos_x=pos_x, pos_y=pos_y, world=world, abundance_at_xy=abundance_at_xy, available_steps=available_steps}, Cmd.none)
     WorldDataArrived (Err err) -> case err of 
       Http.BadUrl s -> ({model | error="BadUrl: "++s}, Cmd.none)
       Http.Timeout -> ({model | error="Timeout"}, Cmd.none)
