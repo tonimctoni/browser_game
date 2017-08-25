@@ -26,15 +26,19 @@ const(
     login_file = "files/login.html"
     home_file = "elm_home/index.html"
     world_file = "elm_world/index.html"
+    add_player_file = "files/add_player.html"
     login_address = "/login"
     unlogin_address = "/unlogin"
     get_name_address = "/get_name"
     get_data_address = "/get_data"
     get_world_address = "/get_world"
+    add_player_address = "/add_player"
     root_address = "/"
     home_address = "/home"
     world_address = "/world"
     cookie_name = "login_token"
+
+    add_player_permission_flag = 0x0001
 
     // time_slot_size = 12*time.Hour
     steps_per_time_slot = 20
@@ -113,53 +117,53 @@ func main() {
         return r.RemoteAddr[:i], nil
     }
 
-    get_player_data:=func(r *http.Request) (*PlayerData, error){
+    get_player_data_and_permissions:=func(r *http.Request) (*PlayerData, uint16, error){
         // If ther is no cookie
         cookie,err:=r.Cookie(cookie_name)
         if err!=nil{
-            return nil, errors.New("No cookie")
+            return nil, 0, errors.New("No cookie")
         }
 
         // If cookie cannot be split at /
         split_cookie:=strings.SplitN(cookie.Value, "/", 2)
         if len(split_cookie)!=2{
-            return nil, errors.New("Ill formated cookie (split len)")
+            return nil, 0, errors.New("Ill formated cookie (split len)")
         }
 
         // If player id cannot be extracted from cookie
         player_id,err:=strconv.ParseUint(split_cookie[1], 16, 64)
         if err!=nil{
-            return nil, errors.New("Ill formated cookie (parse)")
+            return nil, 0, errors.New("Ill formated cookie (parse)")
         }
 
         // If player id is not within the login_state_map
         login_state, ok:=login_state_map.get_login_state(player_id)
         if !ok{
-            return nil, errors.New("Id not registered as logged in")
+            return nil, 0, errors.New("Id not registered as logged in")
         }
 
         // If login token in cookie is different from the one in the saved login state
         if login_state.token!=cookie.Value{
-            return nil, errors.New("Wrong login token")
+            return nil, 0, errors.New("Wrong login token")
         }
 
         // If the ip cannot be gotten from request
         ip,err:=get_ip(r)
         if err!=nil{
-            return nil, err
+            return nil, 0, err
         }
 
         // If the request IP is not the same as the one used to log in
         if ip!=login_state.ip{
-            return nil, errors.New("Wrong ip")
+            return nil, 0, errors.New("Wrong ip")
         }
 
         // If the cookie should have expired
         if time.Now().After(login_state.expire_date){
-            return nil, errors.New("Login expired")
+            return nil, 0, errors.New("Login expired")
         }
 
-        return login_state.player_data, nil
+        return login_state.player_data, login_state.permissions, nil
     }
 
     mux := http.NewServeMux()
@@ -196,7 +200,7 @@ func main() {
     }
 
     mux.HandleFunc(root_address, func (w http.ResponseWriter, r *http.Request){
-        _,err:=get_player_data(r)
+        _,_,err:=get_player_data_and_permissions(r)
         if(err!=nil){
             http.Redirect(w, r, login_address, http.StatusFound)
             return
@@ -206,7 +210,7 @@ func main() {
     })
 
     mux.HandleFunc(home_address, func (w http.ResponseWriter, r *http.Request){
-        _,err:=get_player_data(r)
+        _,_,err:=get_player_data_and_permissions(r)
         if(err!=nil){
             http.Redirect(w, r, login_address, http.StatusFound)
             return
@@ -216,7 +220,7 @@ func main() {
     })
 
     mux.HandleFunc(world_address, func (w http.ResponseWriter, r *http.Request){
-        _,err:=get_player_data(r)
+        _,_,err:=get_player_data_and_permissions(r)
         if(err!=nil){
             http.Redirect(w, r, login_address, http.StatusFound)
             return
@@ -268,7 +272,7 @@ func main() {
             if !ok{
                 panic("Internal error (player_data,ok:player_map.get_player_data(login_data.Id); !ok)")
             }
-            login_state:=LoginState{player_data, cookie_value, ip, expiration}
+            login_state:=LoginState{player_data, login_data.permissions, cookie_value, ip, expiration}
             login_state_map.set_login_state(login_data.id, login_state)
             cookie:=http.Cookie{Name: cookie_name, Value: cookie_value, Expires: expiration}
             http.SetCookie(w, &cookie)
@@ -313,7 +317,7 @@ func main() {
 
     // Gives a player his player data
     mux.HandleFunc(get_data_address, func (w http.ResponseWriter, r *http.Request){
-        player_data,err:=get_player_data(r)
+        player_data,_,err:=get_player_data_and_permissions(r)
         if(err!=nil){
             http.NotFound(w,r)
             return
@@ -331,7 +335,7 @@ func main() {
 
     // Gives a player a map of the fields near him
     mux.HandleFunc(get_world_address, func (w http.ResponseWriter, r *http.Request){
-        player_data,err:=get_player_data(r)
+        player_data,_,err:=get_player_data_and_permissions(r)
         if(err!=nil){
             http.NotFound(w,r)
             return
@@ -385,6 +389,56 @@ func main() {
         }
 
         w.Write(json_player_data)
+    })
+
+    mux.HandleFunc(add_player_address, func (w http.ResponseWriter, r *http.Request){
+        _,permissions,err:=get_player_data_and_permissions(r)
+        if(err!=nil){
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+
+        if (permissions&add_player_permission_flag)==0{
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+
+        if r.Method=="GET"{
+            http.ServeFile(w, r, add_player_file)
+            return
+        } else if r.Method=="POST" {
+            login_name:=r.FormValue("login_name")
+            password:=r.FormValue("password")
+            name:=r.FormValue("name")
+            pos_x,e1:=strconv.ParseInt(r.FormValue("pos_x"), 10, 64)
+            pos_y,e2:=strconv.ParseInt(r.FormValue("pos_y"), 10, 64)
+            resource_a,e3:=strconv.ParseInt(r.FormValue("resource_a"), 10, 64)
+            resource_b,e4:=strconv.ParseInt(r.FormValue("resource_b"), 10, 64)
+            resource_c,e5:=strconv.ParseInt(r.FormValue("resource_c"), 10, 64)
+
+            // If form fields are not available or empty or and error ocurred:
+            if login_name=="" || password=="" || e1!=nil || e2!=nil || e3!=nil || e4!=nil || e5!=nil || len(login_name)>24 || len(name)>24{
+                http.Error(w, "Input error", http.StatusBadRequest)
+                return
+            }
+            // Add user
+            id,err:=login_map.add_login(0, login_name, password)
+            if err!=nil{
+                http.Error(w, fmt.Sprintf("Could not add user (%s)", err.Error()), http.StatusInternalServerError)
+                return
+            }
+            // Add player
+            err=player_map.add_player(id, name, pos_x, pos_y, resource_a, resource_b, resource_c)
+            if err!=nil{
+                http.Error(w, fmt.Sprintf("Could not add player (data is inconsistent now, %s)", err.Error()) , http.StatusInternalServerError)
+                return
+            }
+            w.Write([]byte("Player added"))
+            return
+        } else {
+            http.Error(w, "Request must ge GET or POST.", http.StatusBadRequest)
+            return
+        }
     })
 
     log.Println("Start server")

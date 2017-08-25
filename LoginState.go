@@ -19,6 +19,7 @@ import "sync"
 
 type LoginState struct{
     player_data *PlayerData
+    permissions uint16
     token string
     ip string
     expire_date time.Time

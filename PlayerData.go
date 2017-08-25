@@ -10,7 +10,7 @@ package main;
 // import "crypto/sha512"
 // import "crypto/md5"
 // import "strings"
-// import "errors"
+import "errors"
 // import "strconv"
 import "sync"
 // import "crypto/rand"
@@ -110,19 +110,33 @@ func (p *PlayerMap) save_player_pos(player_data *PlayerData){
     }
 }
 
-func (p *PlayerMap) add_player(id uint64, name string, pos_x, pos_y, resource_a, resource_b, resource_c int64){
+func (p *PlayerMap) add_player(id uint64, name string, pos_x, pos_y, resource_a, resource_b, resource_c int64) error{
+    if len(name)>24{
+        return errors.New("Name is too long (len(name)>24, add_player)")
+    }
+
     p.player_add_and_file_lock.Lock()
     defer p.player_add_and_file_lock.Unlock()
 
+    // Check whether id already exists in map
+    _,ok:=p.player_map[id]
+    if ok{
+        // panic("Id already exists (add_player)")
+        return errors.New("Id already exists (add_player)")
+    }
+
     f, err:=os.OpenFile(p.filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
     if err!=nil{
-        panic("Could not open file (add_player)")
+        // panic("Could not open file (add_player)")
+        return errors.New("Could not open file (add_player)")
     }
     defer f.Close()
 
+    // Get stats of the opened file. Most importantly its size
     file_stat, err:=f.Stat()
     if err!=nil{
-        panic("Could not get file stats")
+        // panic("Could not get file stats")
+        return errors.New("Could not get file stats")
     }
     file_pos:=file_stat.Size()
 
@@ -139,11 +153,6 @@ func (p *PlayerMap) add_player(id uint64, name string, pos_x, pos_y, resource_a,
     f.Write(int64_to_bytes(available_steps))
     f.Write(int64_to_bytes(last_time_gotten_steps))
 
-
-    _,ok:=p.player_map[id]
-    if ok{
-        panic("Id already exists (add_player)")
-    }
-
     p.player_map[id]=&PlayerData{file_pos, &sync.Mutex{}, id, name, pos_x, pos_y, resource_a, resource_b, resource_c, available_steps, last_time_gotten_steps}
+    return nil
 }
