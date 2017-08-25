@@ -70,15 +70,6 @@ func load_PlayerMap(filenme string) PlayerMap{
     return PlayerMap{player_map, &sync.RWMutex{}, filenme}
 }
 
-// func (p *PlayerMap) i_will_modify_player_data(){
-//     p.player_add_and_file_lock.Lock()
-// }
-
-// func (p *PlayerMap) i_am_done_modifying_player_data(){
-//     p.player_add_and_file_lock.Unlock()
-// }
-// maybe just a get function to get the mutex?
-
 func (p *PlayerMap) get_player_data(id uint64) (*PlayerData, bool){
     p.player_add_and_file_lock.RLock()
     player_data, ok:=p.player_map[id]
@@ -87,7 +78,7 @@ func (p *PlayerMap) get_player_data(id uint64) (*PlayerData, bool){
     return player_data, ok
 }
 
-func (p *PlayerMap) save_player_pos(player_data *PlayerData){
+func (p *PlayerMap) open_file_and_do(do func(*os.File) error) error{
     p.player_add_and_file_lock.Lock()
     defer p.player_add_and_file_lock.Unlock()
 
@@ -97,17 +88,135 @@ func (p *PlayerMap) save_player_pos(player_data *PlayerData){
     }
     defer f.Close()
 
+    return do(f)
+}
+
+func save_pos_x(f*os.File, player_data *PlayerData){
     pos_x:=int64_to_bytes(player_data.Pos_x)
-    _,err=f.WriteAt(pos_x[:], player_data.file_pos+32)
+    _,err:=f.WriteAt(pos_x[:], player_data.file_pos+32)
     if err!=nil{
-        panic("Could not write to file (save_player_pos)")
+        panic("Could not write to file (save_pos_x)")
+    }
+}
+
+func save_pos_y(f*os.File, player_data *PlayerData){
+    pos_y:=int64_to_bytes(player_data.Pos_y)
+    _,err:=f.WriteAt(pos_y[:], player_data.file_pos+40)
+    if err!=nil{
+        panic("Could not write to file (save_pos_y)")
+    }
+}
+
+func save_resource_a(f*os.File, player_data *PlayerData){
+    resource_a:=int64_to_bytes(player_data.Resource_A)
+    _,err:=f.WriteAt(resource_a[:], player_data.file_pos+48)
+    if err!=nil{
+        panic("Could not write to file (save_resource_a)")
+    }
+}
+
+func save_resource_b(f*os.File, player_data *PlayerData){
+    resource_b:=int64_to_bytes(player_data.Resource_B)
+    _,err:=f.WriteAt(resource_b[:], player_data.file_pos+56)
+    if err!=nil{
+        panic("Could not write to file (save_resource_b)")
+    }
+}
+
+func save_resource_c(f*os.File, player_data *PlayerData){
+    resource_c:=int64_to_bytes(player_data.Resource_C)
+    _,err:=f.WriteAt(resource_c[:], player_data.file_pos+64)
+    if err!=nil{
+        panic("Could not write to file (save_resource_c)")
+    }
+}
+
+func save_available_steps(f*os.File, player_data *PlayerData){
+    available_steps:=int64_to_bytes(player_data.Available_steps)
+    _,err:=f.WriteAt(available_steps[:], player_data.file_pos+72)
+    if err!=nil{
+        panic("Could not write to file (save_available_steps)")
+    }
+}
+
+func save_last_time_gotten_steps(f*os.File, player_data *PlayerData){
+    last_time_gotten_steps:=int64_to_bytes(player_data.Last_time_gotten_steps)
+    _,err:=f.WriteAt(last_time_gotten_steps[:], player_data.file_pos+80)
+    if err!=nil{
+        panic("Could not write to file (save_last_time_gotten_steps)")
+    }
+}
+
+func (p *PlayerMap) move_up(player_data *PlayerData) error{
+    if player_data.Available_steps<1{
+        return errors.New("No available steps left")
     }
 
-    pos_y:=int64_to_bytes(player_data.Pos_y)
-    _,err=f.WriteAt(pos_y[:], player_data.file_pos+40)
-    if err!=nil{
-        panic("Could not write to file (save_player_pos)")
+    return p.open_file_and_do(func(f *os.File) error{
+            if player_data.Available_steps<1{
+                return errors.New("No available steps left")
+            }
+
+            player_data.Pos_y+=1
+            player_data.Available_steps-=1
+            save_pos_y(f, player_data)
+            save_available_steps(f, player_data)
+            return nil
+        })
+}
+
+func (p *PlayerMap) move_down(player_data *PlayerData) error{
+    if player_data.Available_steps<1{
+        return errors.New("No available steps left")
     }
+
+    return p.open_file_and_do(func(f *os.File) error{
+            if player_data.Available_steps<1{
+                return errors.New("No available steps left")
+            }
+
+            player_data.Pos_y-=1
+            player_data.Available_steps-=1
+            save_pos_y(f, player_data)
+            save_available_steps(f, player_data)
+            return nil
+        })
+}
+
+func (p *PlayerMap) move_left(player_data *PlayerData) error{
+    if player_data.Available_steps<1{
+        return errors.New("No available steps left")
+    }
+
+    return p.open_file_and_do(func(f *os.File) error{
+            if player_data.Available_steps<1{
+                return errors.New("No available steps left")
+            }
+
+            player_data.Pos_x-=1
+            player_data.Available_steps-=1
+            save_pos_x(f, player_data)
+            save_available_steps(f, player_data)
+            return nil
+        })
+}
+
+func (p *PlayerMap) move_right(player_data *PlayerData) error{
+    if player_data.Available_steps<1{
+        return errors.New("No available steps left")
+    }
+
+    return p.open_file_and_do(func(f *os.File) error{
+            if player_data.Available_steps<1{
+                return errors.New("No available steps left")
+            }
+
+            player_data.Pos_x+=1
+            player_data.Available_steps-=1
+            save_pos_x(f, player_data)
+            save_available_steps(f, player_data)
+            return nil
+        })
 }
 
 func (p *PlayerMap) add_player(id uint64, name string, pos_x, pos_y, resource_a, resource_b, resource_c int64) error{
