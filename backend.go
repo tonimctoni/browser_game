@@ -6,22 +6,23 @@ import "net/http"
 import "time"
 import "fmt"
 import "io/ioutil"
-import "crypto/sha256"
-import "crypto/sha512"
-import "crypto/md5"
+// import "crypto/sha256"
+// import "crypto/sha512"
+// import "crypto/md5"
 import "strings"
 import "errors"
 import "strconv"
-import "sync"
+// import "sync"
 import "crypto/rand"
+// import "os"
 
 const(
     login_lifetime time.Duration = 2*time.Hour
     available_files_dir = "files"
     available_files_address = "files"
     world_seed_file = "data/world_seed"
-    login_data_file = "data/login_data.json"
-    player_data_file = "data/player_data.json"
+    login_data_file = "data/logins.data"
+    player_data_file = "data/players.data"
     login_file = "files/login.html"
     home_file = "elm_home/index.html"
     world_file = "elm_world/index.html"
@@ -36,234 +37,9 @@ const(
     cookie_name = "login_token"
 
     // time_slot_size = 12*time.Hour
-    // steps_received_per_time_slot = 20
+    steps_per_time_slot = 20
     // beginning_of_time = //something like time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 )
-
-type MySource struct{
-    state [64]byte
-}
-
-func new_MySource(initial_state [64]byte) MySource{
-    return MySource{initial_state}
-}
-
-func (m *MySource) Seed(s int64) {
-    seed:=uint64(s)
-    for i := uint(0); i < 64; i++ {
-        m.state[i]=byte(((seed>>i)^(seed>>(64-i-1)))&0xff);
-    }
-}
-
-func (m *MySource) Int63() int64{
-    m.state=sha512.Sum512(m.state[:])
-    for m.state[7]&0x80!=0{ //Has two functions: makes sure the last bit is not set (int63 after all), and adds some self shrinking
-        m.state=sha512.Sum512(m.state[:])
-    }
-
-    return int64(m.state[0]) | (int64(m.state[1]) << 8) | (int64(m.state[2]) << 16) | (int64(m.state[3]) << 24) |
-        (int64(m.state[4]) << 32) | (int64(m.state[5]) << 40) | (int64(m.state[6]) << 48) | (int64(m.state[7]) << 56)
-}
-
-
-
-type World struct{
-    seed []byte
-    cache map[[2]int64][2]byte // (x,y) -> (field kind, abundance)
-    cache_rwlock *sync.RWMutex
-}
-
-func new_World() World{
-    seed, err:=ioutil.ReadFile(world_seed_file)
-    if err!=nil{
-        panic(err.Error())
-    }
-    return World{seed, make(map[[2]int64][2]byte), &sync.RWMutex{}}
-}
-
-func (w *World) get_fields_static_data(x,y int64) (byte, byte){
-    // If it is cached, use cached return value
-    w.cache_rwlock.RLock()
-    if field_static_data,ok:=w.cache[[2]int64{x,y}];ok{
-        w.cache_rwlock.RUnlock()
-        return field_static_data[0], field_static_data[1]
-    }
-    w.cache_rwlock.RUnlock()
-
-    // Actually calculate return value
-    kind,quantity:=func() (byte,byte){
-        h := md5.New()
-        h.Write(w.seed)
-        h.Write([]byte{byte(x&0xFF), byte((x>>8)&0xFF), byte(y&0xFF), byte((y>>8)&0xFF)})
-        s:=h.Sum(nil)
-
-        quantity:=(s[1]&0x3F)+36
-        if s[0]<193{
-            return 0, quantity
-        } else if s[0]<193+36{
-            return 1, quantity
-        } else if s[0]<193+36+18{
-            return 2, quantity
-        } else{ //  if s[0]<193+36+18+9
-            return 3, quantity
-        }
-    }()
-
-    //If return value was cached in the meantime use cached return value, otherwise cache calculated return value and return it
-    w.cache_rwlock.Lock()
-    if field_static_data,ok:=w.cache[[2]int64{x,y}];ok{
-        w.cache_rwlock.Unlock()
-        return field_static_data[0], field_static_data[1]
-    } else{
-        field_static_data:=[2]byte{kind,quantity}
-        w.cache[[2]int64{x,y}]=field_static_data
-        w.cache_rwlock.Unlock()
-        return field_static_data[0], field_static_data[1]
-    }
-    // w.cache_rwlock.Unlock()
-}
-
-
-
-type LoginData struct{
-    Id uint64
-    Login_username string
-    Salted_password_hash string
-    Salt string
-}
-
-type PlayerData struct{
-    Id uint64
-    Name string
-    Pos_x int64
-    Pos_y int64
-    Resource_A int64
-    Resource_B int64
-    Resource_C int64
-    Available_steps int64
-    Last_time_gotten_steps int64 // number of time slots elapsed since beginning
-}
-
-type LoginState struct{
-    player_data *PlayerData
-    token string
-    ip string
-    expire_date time.Time
-}
-
-
-
-
-type LoginStateMap struct{
-    login_state_map map[uint64]LoginState // (user_id -> his login state)
-    login_state_map_rwlock *sync.RWMutex
-}
-
-func new_LoginStateMap() LoginStateMap{
-    return LoginStateMap{make(map[uint64]LoginState), &sync.RWMutex{}}
-}
-
-func (l *LoginStateMap) get_login_state(id uint64) (LoginState, bool){
-    l.login_state_map_rwlock.RLock()
-    login_state, ok:=l.login_state_map[id]
-    l.login_state_map_rwlock.RUnlock()
-
-    return login_state, ok
-}
-
-func (l *LoginStateMap) set_login_state(id uint64, login_state LoginState){
-    l.login_state_map_rwlock.Lock()
-    l.login_state_map[id]=login_state
-    l.login_state_map_rwlock.Unlock()
-}
-
-
-
-// Just for some encapsulation <== program is getting complex
-type LoginMap struct{
-    login_map map[string]*LoginData // (username -> all login data)
-}
-
-// This handles the reading of user login data from disk
-func load_LoginMap() LoginMap{
-    // Read whole file
-    content, err:=ioutil.ReadFile(login_data_file)
-    if err!=nil{
-        panic(err.Error())
-    }
-
-    // Turn file content into slice of structs
-    var login_data []LoginData
-    err=json.Unmarshal(content, &login_data)
-    if err!=nil{
-        panic(err.Error())
-    }
-
-    // Make login map (username -> all login data) from login data of all users
-    login_map:=make(map[string]*LoginData)
-    for i:=0; i<len(login_data); i++ {
-        if _,ok:=login_map[login_data[i].Login_username];ok{
-            panic("Duplicate username")
-        }
-        login_map[login_data[i].Login_username]=&login_data[i]
-    }
-
-    return LoginMap{login_map}
-}
-
-func (l *LoginMap) get_login_data(login_name string) (*LoginData, bool){
-    login_data, ok:=l.login_map[login_name]
-    return login_data, ok
-}
-
-
-
-type PlayerMap struct{
-    player_map map[uint64]*PlayerData // (user_id -> his ingame player data)
-    // player_data_modification_lock *sync.Mutex
-}
-
-// This handles the reading of user player data from disk
-func load_PlayerMap() PlayerMap{
-    // Read whole file
-    content, err:=ioutil.ReadFile(player_data_file)
-    if err!=nil{
-        panic(err.Error())
-    }
-
-    // Turn file content into slice of structs
-    var player_data []PlayerData
-    err=json.Unmarshal(content, &player_data)
-    if err!=nil{
-        panic(err.Error())
-    }
-
-    // Make player map (id -> all player data) from player data of all users
-    player_map:=make(map[uint64]*PlayerData)
-    for i:=0; i<len(player_data); i++ {
-        if _,ok:=player_map[player_data[i].Id];ok{
-            panic("Duplicate player id")
-        }
-        player_map[player_data[i].Id]=&player_data[i]
-    }
-
-    return PlayerMap{player_map} // , &sync.Mutex{}
-}
-
-// func (p *PlayerMap) i_will_modify_player_data(){
-//     p.player_data_modification_lock.Lock()
-// }
-
-// func (p *PlayerMap) i_am_done_modifying_player_data(){
-//     p.player_data_modification_lock.Unlock()
-// }
-// maybe just a get function to get the mutex?
-
-func (p *PlayerMap) get_player_data(id uint64) (*PlayerData, bool){
-    player_data, ok:=p.player_map[id]
-    return player_data, ok
-}
-
 
 
 func check_data_integrity(LM LoginMap, PM PlayerMap){
@@ -275,7 +51,7 @@ func check_data_integrity(LM LoginMap, PM PlayerMap){
         panic("len(login_map)!=len(player_map)")
     } else {
         for _,login :=range login_map{
-            if _,ok:=player_map[login.Id];!ok{
+            if _,ok:=player_map[login.id];!ok{
                 panic("Id in login_map not present in player_map")
             }
         }
@@ -292,17 +68,23 @@ func (h *HandlerForFile) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     w.Write(h.content)
 }
 
+// TODO: add "add player" functionality
 // TODO: add counter to next time slot in home page
 // TODO: Log all errors in error log file
 // TODO: Thread safety for all maps
 //      actually, only maps that are modified on runtime
 //      for player data: use locks only when writing, or read-write stuff. Dont use locks for only reads
 func main() {
-    login_map:=load_LoginMap()
-    player_map:=load_PlayerMap()
+    login_map:=load_LoginMap(login_data_file)
+    player_map:=load_PlayerMap(player_data_file)
     check_data_integrity(login_map, player_map)
     login_state_map:=new_LoginStateMap()
     world:=new_World()
+
+
+    // jc_id:=login_map.add_login(0, "JC", "denton")
+    // fmt.Println(jc_id)
+    // player_map.add_player(jc_id, "JC again", -5, -6, 1000, 500, 250)
 
     // Threadsafe rng
     rng:=make(chan int64)
@@ -465,16 +247,8 @@ func main() {
                 return
             }
 
-            is_password_correct:=func() bool{
-                h := sha256.New()
-                h.Write([]byte(password))
-                h.Write([]byte(login_data.Salt))
-                bs := h.Sum(nil)
-
-                return fmt.Sprintf("%x", bs)==login_data.Salted_password_hash
-            }()
             // If password is incorrect
-            if !is_password_correct{
+            if !login_data.is_password_correct(password){
                 http.Error(w, "Invalid login", http.StatusUnauthorized)
                 return
             }
@@ -488,14 +262,14 @@ func main() {
             }
 
             expiration:=time.Now().Add(login_lifetime)
-            cookie_value:=fmt.Sprintf("%x/%x", <-rng, login_data.Id)
-            player_data,ok:=player_map.get_player_data(login_data.Id)
+            cookie_value:=fmt.Sprintf("%x/%x", <-rng, login_data.id)
+            player_data,ok:=player_map.get_player_data(login_data.id)
             // If there is inconsistency in internal data structures *login_map* and *player_map*
             if !ok{
                 panic("Internal error (player_data,ok:player_map.get_player_data(login_data.Id); !ok)")
             }
             login_state:=LoginState{player_data, cookie_value, ip, expiration}
-            login_state_map.set_login_state(login_data.Id, login_state)
+            login_state_map.set_login_state(login_data.id, login_state)
             cookie:=http.Cookie{Name: cookie_name, Value: cookie_value, Expires: expiration}
             http.SetCookie(w, &cookie)
             http.Redirect(w, r, root_address, http.StatusFound)
@@ -568,12 +342,14 @@ func main() {
             Y int64
             World_array [21]byte
             Abundance_at_xy byte
+            Available_steps int64
         }
 
         x:=player_data.Pos_x
         y:=player_data.Pos_y
         to_send.X=x
         to_send.Y=y
+        to_send.Available_steps=player_data.Available_steps
 
         to_send.World_array[0],_=world.get_fields_static_data(x-1,y+2)
         to_send.World_array[1],_=world.get_fields_static_data(x,y+2)
@@ -611,6 +387,7 @@ func main() {
         w.Write(json_player_data)
     })
 
+    log.Println("Start server")
     if err:=http.ListenAndServe(":8000", mux);err!=nil{
         log.Println(err)
     }
