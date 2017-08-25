@@ -4,8 +4,7 @@ import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode
 
---state
-type alias Model =
+type alias Player = 
   { name : String
   , pos_x : Int
   , pos_y : Int
@@ -13,17 +12,39 @@ type alias Model =
   , resource_b : Int
   , resource_c : Int
   , available_steps : Int
+}
+
+--state
+type alias Model =
+  { player : Player
   , error : String
   }
 
+player_decoder : Decode.Decoder Player
+player_decoder = 
+  let
+    map7 = Decode.map7
+    field = Decode.field
+    string = Decode.string
+    int = Decode.int
+  in
+    map7 Player
+      (field "Name" string)
+      (field "Pos_x" int)
+      (field "Pos_y" int)
+      (field "Resource_A" int)
+      (field "Resource_B" int)
+      (field "Resource_C" int)
+      (field "Available_steps" int)
+
 load_player_data: Cmd Msg
-load_player_data = Http.send PlayerDataArrived (Http.getString "/get_data")
+load_player_data = Http.send PlayerDataArrived (Http.get "/get_data" player_decoder)
 
 init: (Model, Cmd Msg)
-init = (Model "" 0 0 0 0 0 0 "", load_player_data)
+init = (Model (Player "" 0 0 0 0 0 0) "", load_player_data)
 
 --names of things that can happen
-type Msg = LoadPlayerData | PlayerDataArrived (Result Http.Error String)
+type Msg = LoadPlayerData | PlayerDataArrived (Result Http.Error Player)
 
 nav_bar: Html Msg
 nav_bar =
@@ -58,13 +79,13 @@ info_table model =
           ]
         , tbody []
           [ tr []
-            [ td [] [model.name |> text]
-            , td [] [model.pos_x |> toString |> text]
-            , td [] [model.pos_y |> toString |> text]
-            , td [] [model.resource_a |> toString |> text]
-            , td [] [model.resource_b |> toString |> text]
-            , td [] [model.resource_c |> toString |> text]
-            , td [] [model.available_steps |> toString |> text]
+            [ td [] [model.player.name |> text]
+            , td [] [model.player.pos_x |> toString |> text]
+            , td [] [model.player.pos_y |> toString |> text]
+            , td [] [model.player.resource_a |> toString |> text]
+            , td [] [model.player.resource_b |> toString |> text]
+            , td [] [model.player.resource_c |> toString |> text]
+            , td [] [model.player.available_steps |> toString |> text]
             ]
           ]
         ]
@@ -102,46 +123,13 @@ update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         LoadPlayerData -> (model, load_player_data)
-        PlayerDataArrived (Ok json_string) -> 
-            let
-                name = case Decode.decodeString (Decode.field "Name" Decode.string) json_string of
-                    Ok(x) -> x
-                    Err(_) -> "error"
-                pos_x = case Decode.decodeString (Decode.field "Pos_x" Decode.int) json_string of
-                    Ok(x) -> x
-                    Err(_) -> -1
-                pos_y = case Decode.decodeString (Decode.field "Pos_y" Decode.int) json_string of
-                    Ok(x) -> x
-                    Err(_) -> -1
-                resource_a = case Decode.decodeString (Decode.field "Resource_A" Decode.int) json_string of
-                    Ok(x) -> x
-                    Err(_) -> -1
-                resource_b = case Decode.decodeString (Decode.field "Resource_B" Decode.int) json_string of
-                    Ok(x) -> x
-                    Err(_) -> -1
-                resource_c = case Decode.decodeString (Decode.field "Resource_C" Decode.int) json_string of
-                    Ok(x) -> x
-                    Err(_) -> -1
-                available_steps = case Decode.decodeString (Decode.field "Available_steps" Decode.int) json_string of
-                    Ok(x) -> x
-                    Err(_) -> -1
-                error = ""
-            in
-                ({model | name=name
-                    , pos_x=pos_x
-                    , pos_y=pos_y
-                    , resource_a=resource_a
-                    , resource_b=resource_b
-                    , resource_c=resource_c
-                    , available_steps=available_steps
-                    , error=error
-                    }, Cmd.none)
+        PlayerDataArrived (Ok player) -> ({model | player=player}, Cmd.none)
         PlayerDataArrived (Err err) -> case err of 
             Http.BadUrl s -> ({model | error="BadUrl: "++s}, Cmd.none)
             Http.Timeout -> ({model | error="Timeout"}, Cmd.none)
             Http.NetworkError -> ({model | error="NetworkError"}, Cmd.none)
             Http.BadStatus _ -> ({model | error="BadStatus"}, Cmd.none)
-            Http.BadPayload _ _ -> ({model | error="BadPayload"}, Cmd.none)
+            Http.BadPayload s _ -> ({model | error="BadPayload: "++s}, Cmd.none)
 
 --events to be notified of
 subscriptions: Model -> Sub Msg

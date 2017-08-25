@@ -5,24 +5,44 @@ import Http
 import Json.Decode as Decode
 import Array
 
---state
-type alias Model =
+type alias PositionData =
   { pos_x : Int
   , pos_y : Int
   , world : Array.Array Int
   , abundance_at_xy : Int
   , available_steps : Int
+  }
+
+--state
+type alias Model =
+  { position_data : PositionData
   , error : String
   }
 
+--(Decode.array Decode.int)
+position_data_decoder : Decode.Decoder PositionData
+position_data_decoder = 
+  let
+    map5 = Decode.map5
+    field = Decode.field
+    array = Decode.array
+    int = Decode.int
+  in
+    map5 PositionData
+      (field "X" int)
+      (field "Y" int)
+      (field "World_array" (array int))
+      (field "Abundance_at_xy" int)
+      (field "Available_steps" int)
+
 load_world_data: Cmd Msg
-load_world_data = Http.send WorldDataArrived (Http.getString "/get_world")
+load_world_data = Http.send WorldDataArrived (Http.get "/get_world" position_data_decoder)
 
 init: (Model, Cmd Msg)
-init = (Model 0 0 Array.empty 0 0 "", load_world_data)
+init = (Model (PositionData 0 0 Array.empty 0 0) "", load_world_data)
 
 --names of things that can happen
-type Msg = MoveUp | MoveDown | MoveLeft | MoveRight | WorldDataArrived (Result Http.Error String)
+type Msg = MoveUp | MoveDown | MoveLeft | MoveRight | WorldDataArrived (Result Http.Error PositionData)
 
 nav_bar: Html Msg
 nav_bar =
@@ -69,34 +89,34 @@ world_map model =
   div []
   [ div [style [("float", "center")]]
     [ get_tile NoBorder Nothing
-    , model.world |> Array.get 0 |> get_tile NormalBorder
-    , model.world |> Array.get 1 |> get_tile NormalBorder
-    , model.world |> Array.get 2 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 0 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 1 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 2 |> get_tile NormalBorder
     , get_tile NoBorder Nothing
     ]
   , div [style [("float", "center")]]
-    [ model.world |> Array.get 3 |> get_tile NormalBorder
-    , model.world |> Array.get 4 |> get_tile NormalBorder
-    , model.world |> Array.get 5 |> get_tile NormalBorder
-    , model.world |> Array.get 6 |> get_tile NormalBorder
-    , model.world |> Array.get 7 |> get_tile NormalBorder]
+    [ model.position_data.world |> Array.get 3 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 4 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 5 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 6 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 7 |> get_tile NormalBorder]
   , div [style [("float", "center")]]
-    [ model.world |> Array.get 8 |> get_tile NormalBorder
-    , model.world |> Array.get 9 |> get_tile NormalBorder
-    , model.world |> Array.get 10 |> get_tile CurrentBorder
-    , model.world |> Array.get 11 |> get_tile NormalBorder
-    , model.world |> Array.get 12 |> get_tile NormalBorder]
+    [ model.position_data.world |> Array.get 8 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 9 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 10 |> get_tile CurrentBorder
+    , model.position_data.world |> Array.get 11 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 12 |> get_tile NormalBorder]
   , div [style [("float", "center")]]
-    [ model.world |> Array.get 13 |> get_tile NormalBorder
-    , model.world |> Array.get 14 |> get_tile NormalBorder
-    , model.world |> Array.get 15 |> get_tile NormalBorder
-    , model.world |> Array.get 16 |> get_tile NormalBorder
-    , model.world |> Array.get 17 |> get_tile NormalBorder]
+    [ model.position_data.world |> Array.get 13 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 14 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 15 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 16 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 17 |> get_tile NormalBorder]
   , div [style [("float", "center")]]
     [ get_tile NoBorder Nothing
-    , model.world |> Array.get 18 |> get_tile NormalBorder
-    , model.world |> Array.get 19 |> get_tile NormalBorder
-    , model.world |> Array.get 20 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 18 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 19 |> get_tile NormalBorder
+    , model.position_data.world |> Array.get 20 |> get_tile NormalBorder
     , get_tile NoBorder Nothing
     ]
   ]
@@ -147,31 +167,13 @@ update msg model =
     MoveDown -> (model, Cmd.none)
     MoveLeft -> (model, Cmd.none)
     MoveRight -> (model, Cmd.none)
-    WorldDataArrived (Ok json_string) -> 
-      let
-        pos_x = case Decode.decodeString (Decode.field "Pos_x" Decode.int) json_string of
-          Ok(x) -> x
-          Err(_) -> -1
-        pos_y = case Decode.decodeString (Decode.field "Pos_y" Decode.int) json_string of
-          Ok(x) -> x
-          Err(_) -> -1
-        world = case Decode.decodeString (Decode.field "World_array" (Decode.array Decode.int)) json_string of
-          Ok(x) -> x
-          Err(_) -> Array.empty
-        abundance_at_xy = case Decode.decodeString (Decode.field "Abundance_at_xy" Decode.int) json_string of
-          Ok(x) -> x
-          Err(_) -> -1
-        available_steps = case Decode.decodeString (Decode.field "Available_steps" Decode.int) json_string of
-          Ok(x) -> x
-          Err(_) -> -1
-      in
-        ({model | pos_x=pos_x, pos_y=pos_y, world=world, abundance_at_xy=abundance_at_xy, available_steps=available_steps}, Cmd.none)
+    WorldDataArrived (Ok position_data) -> ({model | position_data=position_data}, Cmd.none)
     WorldDataArrived (Err err) -> case err of 
       Http.BadUrl s -> ({model | error="BadUrl: "++s}, Cmd.none)
       Http.Timeout -> ({model | error="Timeout"}, Cmd.none)
       Http.NetworkError -> ({model | error="NetworkError"}, Cmd.none)
       Http.BadStatus _ -> ({model | error="BadStatus"}, Cmd.none)
-      Http.BadPayload _ _ -> ({model | error="BadPayload"}, Cmd.none)
+      Http.BadPayload s _ -> ({model | error="BadPayload: "++s}, Cmd.none)
           
 
 --events to be notified of
