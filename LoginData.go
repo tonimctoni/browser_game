@@ -13,7 +13,7 @@ import "crypto/sha256"
 import "errors"
 // import "strconv"
 import "sync"
-import "crypto/rand"
+// import "crypto/rand"
 import "os"
 
 
@@ -85,7 +85,7 @@ func (l *LoginMap) get_login_data(login_name string) (*LoginData, bool){
     return login_data, ok
 }
 
-func (l *LoginMap) add_login(permissions uint16, login_name, password string) (uint64, error){ // returns new ID
+func (l *LoginMap) add_login(permissions uint16, login_name, password string, salt int64) (uint64, error){ // returns new ID
     if len(login_name)>24{
         return 0, errors.New("Login_name is too long (len(login_name)>24, add_login)")
     }
@@ -100,18 +100,16 @@ func (l *LoginMap) add_login(permissions uint16, login_name, password string) (u
         return 0, errors.New("Duplicate login name (add_login)")
     }
 
-    // Get salt
-    salt:=[8]byte{}
-    _,err:=rand.Read(salt[:])
-    if err!=nil{
-        // panic("Could not read random data (add_login)")
-        return 0, errors.New("Could not read random data (add_login)")
+    // Get salt_bytes
+    salt_bytes:=[8]byte{}
+    for i:=uint(0); i<8; i++{
+        salt_bytes[i]=byte(salt>>(8*i))
     }
 
     // Get salted hash
     h := sha256.New()
     h.Write([]byte(password))
-    h.Write(salt[:])
+    h.Write(salt_bytes[:])
     salted_password_hash:=h.Sum(nil)
 
     // Open file with login data
@@ -127,13 +125,13 @@ func (l *LoginMap) add_login(permissions uint16, login_name, password string) (u
     f.Write(uint64_to_bytes(id))
     f.Write(uint16_to_bytes(permissions))
     f.Write(string_to_24_bytes(login_name))
-    f.Write(salt[:])
+    f.Write(salt_bytes[:])
     f.Write(salted_password_hash)
 
     // Add new login to login_map
     salted_password_hash_array:=[32]byte{}
     copy(salted_password_hash_array[:],salted_password_hash)
-    l.login_map[login_name]=&LoginData{id, permissions, login_name, salt, salted_password_hash_array}
+    l.login_map[login_name]=&LoginData{id, permissions, login_name, salt_bytes, salted_password_hash_array}
 
     return id, nil
 }

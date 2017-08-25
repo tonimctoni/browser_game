@@ -433,7 +433,7 @@ func main() {
                 return
             }
             // Add user
-            id,err:=login_map.add_login(0, login_name, password)
+            id,err:=login_map.add_login(0, login_name, password, <-rng)
             if err!=nil{
                 http.Error(w, fmt.Sprintf("Could not add user (%s)", err.Error()), http.StatusInternalServerError)
                 return

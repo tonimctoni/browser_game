@@ -114,7 +114,7 @@ get_tile border_style mi=
       else if border_style==NormalBorder then
         style [("margin", "2px"), ("border-style", "solid"), ("border-width", "4px")]
       else if border_style==CurrentBorder then
-        style [("margin", "2px"), ("border-style", "solid"), ("border-width", "4px"), ("border-color", "blue")]
+        style [("margin", "2px"), ("border-style", "solid"), ("border-width", "4px"), ("border-color", "blue"), ("border-radius", "6px")]
       else
         style []
   in
