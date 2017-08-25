@@ -71,30 +71,32 @@ func load_PlayerMap(filename string) PlayerMap{
     add_player_file_chan:=make(chan func(*os.File, int64), 20)
     modify_player_file_chan:=make(chan func(*os.File), 20)
     go func(){
-        select{
-        case add_player_func:=<-add_player_file_chan:
-            f, err:=os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-            if err!=nil{
-                panic("Could not open file (add_player_file_chan)")
+        for{
+            select{
+            case add_player_func:=<-add_player_file_chan:
+                f, err:=os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+                if err!=nil{
+                    panic("Could not open file (add_player_file_chan)")
+                }
+
+                // Get stats of the opened file. Most importantly its size
+                file_stat, err:=f.Stat()
+                if err!=nil{
+                    panic("Could not get file stats (add_player_file_chan)")
+                }
+
+                add_player_func(f, file_stat.Size())
+                f.Close()
+
+            case modify_player_func:=<-modify_player_file_chan:
+                f, err:=os.OpenFile(filename, os.O_WRONLY, 0644)
+                if err!=nil{
+                    panic("Could not open file (modify_player_file_chan)")
+                }
+
+                modify_player_func(f)
+                f.Close()
             }
-
-            // Get stats of the opened file. Most importantly its size
-            file_stat, err:=f.Stat()
-            if err!=nil{
-                panic("Could not get file stats (add_player_file_chan)")
-            }
-
-            add_player_func(f, file_stat.Size())
-            f.Close()
-
-        case modify_player_func:=<-modify_player_file_chan:
-            f, err:=os.OpenFile(filename, os.O_WRONLY, 0644)
-            if err!=nil{
-                panic("Could not open file (modify_player_file_chan)")
-            }
-
-            modify_player_func(f)
-            f.Close()
         }
     }()
 

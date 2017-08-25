@@ -3,6 +3,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode
+--import Json.Encode as Encode
 import Array
 
 type alias PositionData =
@@ -38,11 +39,52 @@ position_data_decoder =
 load_world_data: Cmd Msg
 load_world_data = Http.send WorldDataArrived (Http.get "/get_world" position_data_decoder)
 
+type Direction = Up | Down | Left | Right
+
+--get_post_body_for_move_request : Direction -> Http.Body
+--get_post_body_for_move_request direction =
+--  let
+--    direction_string = case direction of
+--      Up -> "Up"
+--      Down -> "Down"
+--      Left -> "Left"
+--      Right -> "Right"
+--  in
+--    [("direction", Encode.string direction_string )]
+--    |> Encode.object
+--    |> Http.jsonBody
+
+--get_post_body_for_move_request : Direction -> Http.Body
+--get_post_body_for_move_request direction =
+--  let
+--    direction_string = case direction of
+--      Up -> "Up"
+--      Down -> "Down"
+--      Left -> "Left"
+--      Right -> "Right"
+--  in
+--    Http.multipartBody [Http.stringPart "direction" direction_string]
+
+get_post_body_for_move_request : Direction -> Http.Body
+get_post_body_for_move_request direction =
+  let
+    direction_string = case direction of
+      Up -> "Up"
+      Down -> "Down"
+      Left -> "Left"
+      Right -> "Right"
+  in
+    Http.stringBody "application/x-www-form-urlencoded" ("direction="++direction_string)
+
+send_move_request: Direction -> Cmd Msg
+send_move_request direction =
+  Http.send WorldDataArrived (Http.post "/get_world" (get_post_body_for_move_request direction) position_data_decoder)
+
 init: (Model, Cmd Msg)
 init = (Model (PositionData 0 0 Array.empty 0 0) "", load_world_data)
 
 --names of things that can happen
-type Msg = MoveUp | MoveDown | MoveLeft | MoveRight | WorldDataArrived (Result Http.Error PositionData)
+type Msg = Move (Direction) | WorldDataArrived (Result Http.Error PositionData)
 
 nav_bar: Html Msg
 nav_bar =
@@ -125,10 +167,10 @@ navigator: Model -> Html Msg
 navigator model =
   div []
   [ div [style [("float", "center"), ("margin", "8px")]]
-    [ button [class "btn btn-default", onClick MoveUp] [img [src "/files/arrow_up.png"] []]
-    , button [class "btn btn-default", onClick MoveDown] [img [src "/files/arrow_down.png"] []]
-    , button [class "btn btn-default", onClick MoveLeft] [img [src "/files/arrow_left.png"] []]
-    , button [class "btn btn-default", onClick MoveRight] [img [src "/files/arrow_right.png"] []]
+    [ button [class "btn btn-default", onClick (Move Up)] [img [src "/files/arrow_up.png"] []]
+    , button [class "btn btn-default", onClick (Move Down)] [img [src "/files/arrow_down.png"] []]
+    , button [class "btn btn-default", onClick (Move Left)] [img [src "/files/arrow_left.png"] []]
+    , button [class "btn btn-default", onClick (Move Right)] [img [src "/files/arrow_right.png"] []]
     ]
   ]
 
@@ -163,10 +205,11 @@ view model =
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    MoveUp -> (model, Cmd.none)
-    MoveDown -> (model, Cmd.none)
-    MoveLeft -> (model, Cmd.none)
-    MoveRight -> (model, Cmd.none)
+    Move direction -> (model, send_move_request direction)
+    --MoveUp -> (model, Cmd.none)
+    --MoveDown -> (model, Cmd.none)
+    --MoveLeft -> (model, Cmd.none)
+    --MoveRight -> (model, Cmd.none)
     WorldDataArrived (Ok position_data) -> ({model | position_data=position_data}, Cmd.none)
     WorldDataArrived (Err err) -> case err of 
       Http.BadUrl s -> ({model | error="BadUrl: "++s}, Cmd.none)

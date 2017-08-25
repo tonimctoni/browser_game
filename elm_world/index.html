@@ -9001,78 +9001,6 @@ var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p0 = msg;
-		switch (_p0.ctor) {
-			case 'MoveUp':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'MoveDown':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'MoveLeft':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'MoveRight':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			default:
-				if (_p0._0.ctor === 'Ok') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{position_data: _p0._0._0}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					var _p1 = _p0._0._0;
-					switch (_p1.ctor) {
-						case 'BadUrl':
-							return {
-								ctor: '_Tuple2',
-								_0: _elm_lang$core$Native_Utils.update(
-									model,
-									{
-										error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p1._0)
-									}),
-								_1: _elm_lang$core$Platform_Cmd$none
-							};
-						case 'Timeout':
-							return {
-								ctor: '_Tuple2',
-								_0: _elm_lang$core$Native_Utils.update(
-									model,
-									{error: 'Timeout'}),
-								_1: _elm_lang$core$Platform_Cmd$none
-							};
-						case 'NetworkError':
-							return {
-								ctor: '_Tuple2',
-								_0: _elm_lang$core$Native_Utils.update(
-									model,
-									{error: 'NetworkError'}),
-								_1: _elm_lang$core$Platform_Cmd$none
-							};
-						case 'BadStatus':
-							return {
-								ctor: '_Tuple2',
-								_0: _elm_lang$core$Native_Utils.update(
-									model,
-									{error: 'BadStatus'}),
-								_1: _elm_lang$core$Platform_Cmd$none
-							};
-						default:
-							return {
-								ctor: '_Tuple2',
-								_0: _elm_lang$core$Native_Utils.update(
-									model,
-									{
-										error: A2(_elm_lang$core$Basics_ops['++'], 'BadPayload: ', _p1._0)
-									}),
-								_1: _elm_lang$core$Platform_Cmd$none
-							};
-					}
-				}
-		}
-	});
 var _user$project$Main$error_message = function (model) {
 	return _elm_lang$core$Native_Utils.eq(model.error, '') ? A2(
 		_elm_lang$html$Html$div,
@@ -9280,6 +9208,25 @@ var _user$project$Main$nav_bar = A2(
 			}),
 		_1: {ctor: '[]'}
 	});
+var _user$project$Main$get_post_body_for_move_request = function (direction) {
+	var direction_string = function () {
+		var _p0 = direction;
+		switch (_p0.ctor) {
+			case 'Up':
+				return 'Up';
+			case 'Down':
+				return 'Down';
+			case 'Left':
+				return 'Left';
+			default:
+				return 'Right';
+		}
+	}();
+	return A2(
+		_elm_lang$http$Http$stringBody,
+		'application/x-www-form-urlencoded',
+		A2(_elm_lang$core$Basics_ops['++'], 'direction=', direction_string));
+};
 var _user$project$Main$PositionData = F5(
 	function (a, b, c, d, e) {
 		return {pos_x: a, pos_y: b, world: c, abundance_at_xy: d, available_steps: e};
@@ -9305,6 +9252,10 @@ var _user$project$Main$Model = F2(
 	function (a, b) {
 		return {position_data: a, error: b};
 	});
+var _user$project$Main$Right = {ctor: 'Right'};
+var _user$project$Main$Left = {ctor: 'Left'};
+var _user$project$Main$Down = {ctor: 'Down'};
+var _user$project$Main$Up = {ctor: 'Up'};
 var _user$project$Main$WorldDataArrived = function (a) {
 	return {ctor: 'WorldDataArrived', _0: a};
 };
@@ -9320,10 +9271,88 @@ var _user$project$Main$init = {
 		''),
 	_1: _user$project$Main$load_world_data
 };
-var _user$project$Main$MoveRight = {ctor: 'MoveRight'};
-var _user$project$Main$MoveLeft = {ctor: 'MoveLeft'};
-var _user$project$Main$MoveDown = {ctor: 'MoveDown'};
-var _user$project$Main$MoveUp = {ctor: 'MoveUp'};
+var _user$project$Main$send_move_request = function (direction) {
+	return A2(
+		_elm_lang$http$Http$send,
+		_user$project$Main$WorldDataArrived,
+		A3(
+			_elm_lang$http$Http$post,
+			'/get_world',
+			_user$project$Main$get_post_body_for_move_request(direction),
+			_user$project$Main$position_data_decoder));
+};
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p1 = msg;
+		if (_p1.ctor === 'Move') {
+			return {
+				ctor: '_Tuple2',
+				_0: model,
+				_1: _user$project$Main$send_move_request(_p1._0)
+			};
+		} else {
+			if (_p1._0.ctor === 'Ok') {
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{position_data: _p1._0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			} else {
+				var _p2 = _p1._0._0;
+				switch (_p2.ctor) {
+					case 'BadUrl':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{
+									error: A2(_elm_lang$core$Basics_ops['++'], 'BadUrl: ', _p2._0)
+								}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					case 'Timeout':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{error: 'Timeout'}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					case 'NetworkError':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{error: 'NetworkError'}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					case 'BadStatus':
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{error: 'BadStatus'}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					default:
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{
+									error: A2(_elm_lang$core$Basics_ops['++'], 'BadPayload: ', _p2._0)
+								}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+				}
+			}
+		}
+	});
+var _user$project$Main$Move = function (a) {
+	return {ctor: 'Move', _0: a};
+};
 var _user$project$Main$navigator = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -9355,7 +9384,8 @@ var _user$project$Main$navigator = function (model) {
 							_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$MoveUp),
+								_0: _elm_lang$html$Html_Events$onClick(
+									_user$project$Main$Move(_user$project$Main$Up)),
 								_1: {ctor: '[]'}
 							}
 						},
@@ -9380,7 +9410,8 @@ var _user$project$Main$navigator = function (model) {
 								_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$MoveDown),
+									_0: _elm_lang$html$Html_Events$onClick(
+										_user$project$Main$Move(_user$project$Main$Down)),
 									_1: {ctor: '[]'}
 								}
 							},
@@ -9405,7 +9436,8 @@ var _user$project$Main$navigator = function (model) {
 									_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$MoveLeft),
+										_0: _elm_lang$html$Html_Events$onClick(
+											_user$project$Main$Move(_user$project$Main$Left)),
 										_1: {ctor: '[]'}
 									}
 								},
@@ -9430,7 +9462,8 @@ var _user$project$Main$navigator = function (model) {
 										_0: _elm_lang$html$Html_Attributes$class('btn btn-default'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$MoveRight),
+											_0: _elm_lang$html$Html_Events$onClick(
+												_user$project$Main$Move(_user$project$Main$Right)),
 											_1: {ctor: '[]'}
 										}
 									},
@@ -9496,8 +9529,8 @@ var _user$project$Main$get_tile = F2(
 				}
 			}) : _elm_lang$html$Html_Attributes$style(
 			{ctor: '[]'})));
-		var _p2 = mi;
-		if (_p2.ctor === 'Nothing') {
+		var _p3 = mi;
+		if (_p3.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$img,
 				{
@@ -9511,7 +9544,7 @@ var _user$project$Main$get_tile = F2(
 				},
 				{ctor: '[]'});
 		} else {
-			switch (_p2._0) {
+			switch (_p3._0) {
 				case 0:
 					return A2(
 						_elm_lang$html$Html$img,

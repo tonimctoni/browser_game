@@ -339,9 +339,16 @@ func main() {
         }
 
         if r.Method=="POST"{
-            r.ParseForm()
-            log.Println(r.PostForm)
-            // http.ServeFile(w, r, add_player_file)
+            direction:=r.FormValue("direction")
+            if direction=="Up"{
+                player_map.move_up(player_data)
+            } else if direction=="Down"{
+                player_map.move_down(player_data)
+            } else if direction=="Left"{
+                player_map.move_left(player_data)
+            } else if direction=="Right"{
+                player_map.move_right(player_data)
+            }
         }
 
         var to_send struct{
